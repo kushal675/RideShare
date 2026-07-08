@@ -3023,14 +3023,61 @@ const { data: oldGroup } = await supabase
     .neq("id", groupId)
     .maybeSingle();
 if (oldGroup) {
-await supabase
-    .from("group_request")
-    .delete()
-    .eq("group_id", oldGroup.id);
-await supabase
-    .from("groups")
-    .delete()
-    .eq("id", oldGroup.id);
+
+    const { data: oldRequests } = await supabase
+        .from("group_request")
+        .select("*")
+        .eq("group_id", oldGroup.id);
+
+    for (const oldRequest of oldRequests || []) {
+
+        if (oldRequest.status !== "pending")
+            continue;
+
+        if (oldRequest.type === "invitation") {
+
+            await removePendingNotification({
+
+                userId: oldRequest.receiver_id,
+
+                type: "INVITATION_RECEIVED",
+
+                groupId: oldRequest.group_id,
+
+                rideRequestId: oldRequest.receiver_request_id
+
+            });
+
+        }
+
+        else if (oldRequest.type === "join_request") {
+
+            await removePendingNotification({
+
+                userId: oldRequest.receiver_id,
+
+                type: "JOIN_REQUEST",
+
+                groupId: oldRequest.group_id,
+
+                rideRequestId: oldRequest.sender_request_id
+
+            });
+
+        }
+
+    }
+
+    await supabase
+        .from("group_request")
+        .delete()
+        .eq("group_id", oldGroup.id);
+
+    await supabase
+        .from("groups")
+        .delete()
+        .eq("id", oldGroup.id);
+
 }
 //------------------------------------------------
 // Count members
