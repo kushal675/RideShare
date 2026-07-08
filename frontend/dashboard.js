@@ -857,7 +857,8 @@ const PLACES = [
   'Tumkur Road',
   'Silk Board',
   'Baglur Cross',
-  'Church Street'
+  'Church Street',
+  'Cubbon Park','Pheonix Mall of Asia', 'Commercial Street','Basavanagudi','Jayanagar','Pheonix Market CIty','UB City','Orion Mall','Nexus Mall','Lulu Mall','Galleria Mall'
 ];
 
 function initPlacesAutocomplete(inputId) {

@@ -379,7 +379,7 @@ async function updateCompletedRides() {
 }
 
 app.use(async (req, res, next) => {
-
+    console.log("Incoming request:", req.method, req.path);
     // Skip routes that don't need ride status updates
     const skippedRoutes = [
         "/send-otp",
