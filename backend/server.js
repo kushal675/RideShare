@@ -92,33 +92,8 @@ const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_KEY
 );
-const dnsPromises = require("dns").promises;
 
-async function createTransporter() {
-    const [ipv4] = await dnsPromises.resolve4("smtp.gmail.com");
-
-    return nodemailer.createTransport({
-        host: ipv4,
-        port: 465,
-        secure: true,
-        tls: {
-            servername: "smtp.gmail.com"
-        },
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        }
-    });
-}
-const transporter = await createTransporter();
-transporter.verify(function (error, success) {
-    if (error) {
-        console.error("SMTP VERIFY FAILED");
-        console.error(error);
-    } else {
-        console.log("SMTP SERVER READY");
-    }
-});
+const { getTransporter } = require("./mailer");
 
 /* ============================================
    JWT HELPERS
@@ -482,6 +457,8 @@ if (
     try {
 
         console.log("About to send email...");
+
+        const transporter = await getTransporter();
 
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
@@ -869,6 +846,8 @@ app.post("/send-forgot-otp", otpLimiter, async (req, res) => {
                     5 * 60 * 1000
             };
         }
+
+        const transporter = await getTransporter();
 
         await transporter.sendMail({
             from:
