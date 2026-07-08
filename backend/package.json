@@ -12,6 +12,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@getbrevo/brevo": "^6.0.2",
     "@supabase/supabase-js": "^2.108.2",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
@@ -23,7 +24,6 @@
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.3.0",
     "mongoose": "^9.7.1",
-    "nodemailer": "^9.0.1",
-    "resend": "^6.17.1"
+    "nodemailer": "^9.0.1"
   }
 }

@@ -1,13 +1,23 @@
-const { Resend } = require("resend");
+const brevo = require("@getbrevo/brevo");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const apiInstance = new brevo.TransactionalEmailsApi();
+
+apiInstance.setApiKey(
+    brevo.TransactionalEmailsApiApiKeys.apiKey,
+    process.env.BREVO_API_KEY
+);
+
+const sender = {
+    name: "RideShare",
+    email: "ridesharefarehelp@gmail.com"
+};
 
 async function sendOTPEmail(email, otp) {
-    await resend.emails.send({
-        from: "RideShare <onboarding@resend.dev>",
-        to: email,
+    const emailData = {
+        sender,
+        to: [{ email }],
         subject: "RideShare Email Verification",
-        html: `
+        htmlContent: `
             <div style="font-family:Arial,sans-serif">
                 <h2>RideShare OTP Verification</h2>
 
@@ -25,15 +35,17 @@ async function sendOTPEmail(email, otp) {
                 <p>If you didn't request this, please ignore this email.</p>
             </div>
         `
-    });
+    };
+
+    await apiInstance.sendTransacEmail(emailData);
 }
 
 async function sendForgotPasswordOTP(email, otp) {
-    await resend.emails.send({
-        from: "RideShare <onboarding@resend.dev>",
-        to: email,
+    const emailData = {
+        sender,
+        to: [{ email }],
         subject: "RideShare Password Reset",
-        html: `
+        htmlContent: `
             <div style="font-family:Arial,sans-serif">
                 <h2>Password Reset</h2>
 
@@ -49,7 +61,9 @@ async function sendForgotPasswordOTP(email, otp) {
                 <p>This OTP is valid for 5 minutes.</p>
             </div>
         `
-    });
+    };
+
+    await apiInstance.sendTransacEmail(emailData);
 }
 
 module.exports = {
