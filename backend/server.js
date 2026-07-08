@@ -200,7 +200,7 @@ async function removePendingNotification({
 }
 
 async function updateCompletedRides() {
-
+    console.log("updateCompletedRides() called");
     try {
 
         const now = new Date().toISOString();
