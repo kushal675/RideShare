@@ -856,6 +856,8 @@ const PLACES = [
   'Yelahanka',
   'Tumkur Road',
   'Silk Board',
+  'Baglur Cross',
+  'Church Street'
 ];
 
 function initPlacesAutocomplete(inputId) {
