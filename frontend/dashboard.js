@@ -312,8 +312,8 @@ async function loadDashboardData() {
 
   try {
     const [reqRes, groupRes] = await Promise.all([
-      apiFetch(`http://localhost:3000/my-ride-requests`),
-      apiFetch(`http://localhost:3000/active-groups`)
+      apiFetch(`https://rideshare-backend-uv0p.onrender.com/my-ride-requests`),
+      apiFetch(`https://rideshare-backend-uv0p.onrender.com/active-groups`)
     ]);
 
     const reqData   = reqRes.ok   ? await reqRes.json()   : { requests: [] };
@@ -438,7 +438,7 @@ async function loadNotifications() {
     try {
 
         const response = await apiFetch(
-            `http://localhost:3000/notifications`
+            `https://rideshare-backend-uv0p.onrender.com/notifications`
         );
 
         const data = await response.json();
@@ -478,7 +478,7 @@ async function clearNotifs() {
 
 
     const response = await apiFetch(
-        "http://localhost:3000/notification/read-all",
+        "https://rideshare-backend-uv0p.onrender.com/notification/read-all",
         {
             method:"POST",
             headers:{
@@ -620,7 +620,7 @@ async function markNotificationRead(id) {
     try {
 
         const response = await apiFetch(
-            "http://localhost:3000/notification/read",
+            "https://rideshare-backend-uv0p.onrender.com/notification/read",
             {
                 method: "POST",
                 headers: {
@@ -1016,7 +1016,7 @@ submitBtn.innerHTML = `
 try{
     const response =
         await apiFetch(
-            "http://localhost:3000/create-request",
+            "https://rideshare-backend-uv0p.onrender.com/create-request",
             {
                 method: "POST",
                 headers: {
@@ -1083,7 +1083,7 @@ updateBtn.innerHTML = `
     console.log("editingRequestId =", editingRequestId);
     try {
 
-        const response = await apiFetch(`http://localhost:3000/ride-request`, {
+        const response = await apiFetch(`https://rideshare-backend-uv0p.onrender.com/ride-request`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
@@ -1178,7 +1178,7 @@ async function loadMyRideRequests() {
 
 
     const response = await apiFetch(
-        `http://localhost:3000/my-ride-requests`
+        `https://rideshare-backend-uv0p.onrender.com/my-ride-requests`
     );
     if (!response.ok) {
       showToast("Failed to load ride requests","error");
@@ -1350,7 +1350,7 @@ async function acceptInvitation(id) {
     groupId: inv.groupId
 });
     const response = await apiFetch(
-        "http://localhost:3000/accept-invitation",
+        "https://rideshare-backend-uv0p.onrender.com/accept-invitation",
         {
             method: "POST",
 
@@ -1392,7 +1392,7 @@ async function rejectInvitation(id) {
     try {
 
         const response = await apiFetch(
-            "http://localhost:3000/reject-invitation",
+            "https://rideshare-backend-uv0p.onrender.com/reject-invitation",
             {
                 method: "POST",
                 headers: {
@@ -1432,7 +1432,7 @@ async function handleCancelInvitation(groupId, invitationId) {
     try {
 
         const response = await apiFetch(
-            "http://localhost:3000/cancel-invitation",
+            "https://rideshare-backend-uv0p.onrender.com/cancel-invitation",
             {
                 method: "POST",
                 headers: {
@@ -1752,7 +1752,7 @@ async function confirmDeleteRequest() {
     try {
 
         const response = await apiFetch(
-            `http://localhost:3000/ride-request`,
+            `https://rideshare-backend-uv0p.onrender.com/ride-request`,
             {
                 method: "DELETE"
             }
@@ -1830,7 +1830,7 @@ async function loadActiveGroups() {
     try {
 
         const response = await apiFetch(
-            `http://localhost:3000/active-groups`
+            `https://rideshare-backend-uv0p.onrender.com/active-groups`
         );
 
         const data = await response.json();
@@ -2194,7 +2194,7 @@ async function confirmLeaveGroup() {
     try {
 
         const response = await apiFetch(
-            "http://localhost:3000/leave-group",
+            "https://rideshare-backend-uv0p.onrender.com/leave-group",
             {
                 method: "POST",
                 headers: {
@@ -2238,7 +2238,7 @@ async function handleAcceptJoinRequest(groupId, requestId) {
     try {
 
         const response = await apiFetch(
-            "http://localhost:3000/accept-join-request",
+            "https://rideshare-backend-uv0p.onrender.com/accept-join-request",
             {
                 method: "POST",
                 headers: {
@@ -2292,7 +2292,7 @@ async function handleRejectJoinRequest(groupId, requestId) {
     try {
 
         const response = await apiFetch(
-            "http://localhost:3000/reject-join-request",
+            "https://rideshare-backend-uv0p.onrender.com/reject-join-request",
             {
                 method: "POST",
                 headers: {
@@ -2382,7 +2382,7 @@ async function saveWhatsappLink() {
     try {
 
         const response = await apiFetch(
-            "http://localhost:3000/group-whatsapp",
+            "https://rideshare-backend-uv0p.onrender.com/group-whatsapp",
             {
                 method: "POST",
                 headers: {
@@ -2539,7 +2539,7 @@ function editSelectedRequest() {
     `;
 }
 async function loadMyRequests(preferredId = null) {
-  const response = await apiFetch("http://localhost:3000/my-requests", {
+  const response = await apiFetch("https://rideshare-backend-uv0p.onrender.com/my-requests", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: null
@@ -2585,7 +2585,7 @@ async function loadMatchingStudents(requestId) {
 
     if (!req) return;
 
-    const response = await apiFetch("http://localhost:3000/matching-students", {
+    const response = await apiFetch("https://rideshare-backend-uv0p.onrender.com/matching-students", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -2632,7 +2632,7 @@ async function loadMatchingGroups(requestId) {
 
     if(!req) return;
 
-    const response = await apiFetch("http://localhost:3000/matching-groups",{
+    const response = await apiFetch("https://rideshare-backend-uv0p.onrender.com/matching-groups",{
         method:"POST",
         headers:{
             "Content-Type":"application/json"
@@ -2709,7 +2709,7 @@ async function loadGroupStatus() {
     }
 
     const response = await apiFetch(
-        "http://localhost:3000/group-status",
+        "https://rideshare-backend-uv0p.onrender.com/group-status",
         {
             method: "POST",
             headers: {
@@ -3110,7 +3110,7 @@ async function createGroup() {
     if (inviteExistingGroup) {
         console.log(inviteExistingGroup);
         const response = await apiFetch(
-            "http://localhost:3000/invite-members-existinggc",
+            "https://rideshare-backend-uv0p.onrender.com/invite-members-existinggc",
             {
                 method: "POST",
 
@@ -3167,7 +3167,7 @@ async function createGroup() {
     // Brand New Group
     //--------------------------------------------------
 
-    const response = await apiFetch("http://localhost:3000/create-group", {
+    const response = await apiFetch("https://rideshare-backend-uv0p.onrender.com/create-group", {
 
         method: "POST",
 
@@ -3474,7 +3474,7 @@ async function sendJoinRequest() {
 }
 
     const response = await apiFetch(
-        "http://localhost:3000/join-group",
+        "https://rideshare-backend-uv0p.onrender.com/join-group",
         {
             method: "POST",
 
@@ -3516,7 +3516,7 @@ async function loadJoinRequests() {
 
 
     const response = await apiFetch(
-        `http://localhost:3000/join-requests`
+        `https://rideshare-backend-uv0p.onrender.com/join-requests`
     );
 
     const data = await response.json();
@@ -3552,7 +3552,7 @@ document.addEventListener('keydown', e => {
 ══════════════════════════════════ */
 async function initProfile() {
 
-    const response = await apiFetch("http://localhost:3000/profile");
+    const response = await apiFetch("https://rideshare-backend-uv0p.onrender.com/profile");
 
 
     const user = await response.json();
@@ -3580,7 +3580,7 @@ async function saveProfile() {
     };
 
     const response = await apiFetch(
-        "http://localhost:3000/update-profile",
+        "https://rideshare-backend-uv0p.onrender.com/update-profile",
         {
             method: "POST",
             headers: {

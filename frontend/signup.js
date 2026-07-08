@@ -86,7 +86,7 @@ console.log("signup.js loaded");
       const btn = document.getElementById('btnSendOtp');
       btn.disabled = true;
     btn.classList.add("loading");
-      fetch("http://localhost:3000/send-otp", {
+      fetch("https://rideshare-backend-uv0p.onrender.com/send-otp", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -162,7 +162,7 @@ console.log("signup.js loaded");
 
         const response =
             await fetch(
-                "http://localhost:3000/send-otp",
+                "https://rideshare-backend-uv0p.onrender.com/send-otp",
                 {
                     method: "POST",
                     headers: {
@@ -240,7 +240,7 @@ console.log("signup.js loaded");
 
         const response =
             await fetch(
-                "http://localhost:3000/verify-otp",
+                "https://rideshare-backend-uv0p.onrender.com/verify-otp",
                 {
                     method: "POST",
                     headers: {
@@ -327,7 +327,7 @@ console.log("signup.js loaded");
 
         const response =
             await fetch(
-                "http://localhost:3000/signup",
+                "https://rideshare-backend-uv0p.onrender.com/signup",
                 {
                     method: "POST",
                     headers: {

@@ -69,7 +69,7 @@
 
         const response =
             await fetch(
-                "http://localhost:3000/send-forgot-otp",
+                "https://rideshare-backend-uv0p.onrender.com/send-forgot-otp",
                 {
                     method: "POST",
                     headers: {
@@ -159,7 +159,7 @@ async function resendOtp() {
 
         const response =
             await fetch(
-                "http://localhost:3000/send-forgot-otp",
+                "https://rideshare-backend-uv0p.onrender.com/send-forgot-otp",
                 {
                     method: "POST",
                     headers: {
@@ -238,7 +238,7 @@ async function verifyOtp() {
 
         const response =
             await fetch(
-                "http://localhost:3000/verify-otp",
+                "https://rideshare-backend-uv0p.onrender.com/verify-otp",
                 {
                     method: "POST",
                     headers: {
@@ -358,7 +358,7 @@ async function resetPassword() {
 
         const response =
             await fetch(
-                "http://localhost:3000/reset-password",
+                "https://rideshare-backend-uv0p.onrender.com/reset-password",
                 {
                     method: "POST",
                     headers: {
