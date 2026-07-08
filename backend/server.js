@@ -456,6 +456,8 @@ if (
 
     try {
 
+        console.log("About to send email...");
+
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
             to: email,
@@ -463,16 +465,19 @@ if (
             html: `<h2>Your OTP is ${otp}</h2>`
         });
 
-        res.json({
+        console.log("Email sent successfully");
+
+        return res.json({
             success: true
         });
 
     } catch (err) {
-
+        console.error("SEND MAIL ERROR:");
         console.error(err);
 
-        res.status(500).json({
-            success: false
+        return res.status(500).json({
+            success: false,
+            message: err.message
         });
     }
 });
