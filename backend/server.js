@@ -227,15 +227,23 @@ async function updateCompletedRides() {
                 `${ride.ride_date}T${ride.ride_time}`
             );
 
+            console.log("----------------");
+            console.log("Ride ID:", ride.id);
+            console.log("Ride Date:", ride.ride_date);
+            console.log("Ride Time:", ride.ride_time);
+            console.log("Parsed:", rideDateTime);
+
             rideDateTime.setHours(
                 rideDateTime.getHours() + 1
             );
 
+            console.log("Expiry:", rideDateTime);
+            console.log("Now:", new Date(now));
+            console.log("Expired?", new Date(now) >= rideDateTime);
+
             if (new Date(now) >= rideDateTime) {
 
-                completedRideRequestIds.push(
-                    ride.id
-                );
+                completedRideRequestIds.push(ride.id);
 
             }
 
