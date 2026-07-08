@@ -11,6 +11,11 @@ const { createClient } = require("@supabase/supabase-js");
 const crypto = require("crypto");
 const JWT_SECRET = process.env.JWT_SECRET;
 const app = express();
+
+const dns = require("dns");
+
+dns.setDefaultResultOrder("ipv4first");
+
 app.set("trust proxy", 1);
 
 const allowedOrigins = [
