@@ -325,6 +325,15 @@ async function updateCompletedRides() {
                         completed_at: now
                     })
                     .in("id", completedGroupIds);
+                await supabase
+                    .from("group_members")
+                    .delete()
+                    .in("group_id", completedGroupIds);
+
+                await supabase
+                    .from("group_request")
+                    .delete()
+                    .in("group_id", completedGroupIds);    
 
                 //--------------------------------------------------
                 // Notify every member of completed groups
@@ -3991,6 +4000,9 @@ app.get("/active-groups", requireAuth, async (req, res) => {
                     .single();
 
             if (groupError || !group) {
+                continue;
+            }
+            if (group.status === "completed") {
                 continue;
             }
 
