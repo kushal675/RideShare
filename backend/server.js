@@ -2427,20 +2427,27 @@ app.post("/accept-join-request", requireAuth, async (req, res) => {
             //--------------------------------------------------
             // Remove sender's old pending group (if any)
             //--------------------------------------------------
-
             const { data: oldGroup } = await supabase
                 .from("groups")
                 .select("*")
                 .eq("ride_request_id", request.sender_request_id)
-                .neq("id", group.id)
+                .neq("id", group.id)                                   // use group.id in accept-join-request
                 .maybeSingle();
 
-            if (oldGroup) {
+            if (oldGroup && oldGroup.status === "pending") {
+
+                //--------------------------------------------------
+                // Fetch all requests belonging to old group
+                //--------------------------------------------------
 
                 const { data: oldRequests } = await supabase
                     .from("group_request")
                     .select("*")
                     .eq("group_id", oldGroup.id);
+
+                //--------------------------------------------------
+                // Remove notifications for pending requests
+                //--------------------------------------------------
 
                 for (const oldRequest of oldRequests || []) {
 
@@ -2481,17 +2488,38 @@ app.post("/accept-join-request", requireAuth, async (req, res) => {
 
                 }
 
-                await supabase
+                //--------------------------------------------------
+                // Delete ALL requests of old group
+                //--------------------------------------------------
+
+                const { error: deleteRequestError } = await supabase
                     .from("group_request")
                     .delete()
                     .eq("group_id", oldGroup.id);
 
-                await supabase
+                if (deleteRequestError) {
+
+                    return res.status(500).json(deleteRequestError);
+
+                }
+
+                //--------------------------------------------------
+                // Delete old group
+                //--------------------------------------------------
+
+                const { error: deleteGroupError } = await supabase
                     .from("groups")
                     .delete()
                     .eq("id", oldGroup.id);
 
+                if (deleteGroupError) {
+
+                    return res.status(500).json(deleteGroupError);
+
+                }
+
             }
+            
         //--------------------------------------------------
         // Group becomes active after first accepted member
         //--------------------------------------------------
@@ -3020,14 +3048,24 @@ const { data: oldGroup } = await supabase
     .from("groups")
     .select("*")
     .eq("ride_request_id", invitation.receiver_request_id)
-    .neq("id", groupId)
+.neq("id", groupId)                                   // use group.id in accept-join-request
     .maybeSingle();
-if (oldGroup) {
+
+if (oldGroup && oldGroup.status === "pending") {
+
+
+    //--------------------------------------------------
+    // Fetch all requests belonging to old group
+    //--------------------------------------------------
 
     const { data: oldRequests } = await supabase
         .from("group_request")
         .select("*")
         .eq("group_id", oldGroup.id);
+
+    //--------------------------------------------------
+    // Remove notifications for pending requests
+    //--------------------------------------------------
 
     for (const oldRequest of oldRequests || []) {
 
@@ -3068,15 +3106,35 @@ if (oldGroup) {
 
     }
 
-    await supabase
+    //--------------------------------------------------
+    // Delete ALL requests of old group
+    //--------------------------------------------------
+
+    const { error: deleteRequestError } = await supabase
         .from("group_request")
         .delete()
         .eq("group_id", oldGroup.id);
 
-    await supabase
+    if (deleteRequestError) {
+
+        return res.status(500).json(deleteRequestError);
+
+    }
+
+    //--------------------------------------------------
+    // Delete old group
+    //--------------------------------------------------
+
+    const { error: deleteGroupError } = await supabase
         .from("groups")
         .delete()
         .eq("id", oldGroup.id);
+
+    if (deleteGroupError) {
+
+        return res.status(500).json(deleteGroupError);
+
+    }
 
 }
 //------------------------------------------------
