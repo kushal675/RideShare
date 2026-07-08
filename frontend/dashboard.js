@@ -1752,7 +1752,7 @@ async function confirmDeleteRequest() {
     try {
 
         const response = await apiFetch(
-            `https://rideshare-backend-uv0p.onrender.com/ride-request`,
+            `https://rideshare-backend-uv0p.onrender.com/ride-request/${editingRequestId}`,
             {
                 method: "DELETE"
             }
