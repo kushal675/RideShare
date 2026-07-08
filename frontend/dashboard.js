@@ -3210,7 +3210,7 @@ async function createGroup() {
     await loadNotifications();
     setTimeout(() => {
 
-        navigate("active-groups");
+        navigate("my-requests")
 
     }, 1000);
 
