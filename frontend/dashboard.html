@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MIT BLR Ride Sharing — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="dashboard.css"/>
+</head>
+<body>
+
+<!-- ── BACKGROUND ── -->
+<div class="bg-layer" aria-hidden="true">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="blob blob-4"></div>
+  <canvas id="particleCanvas"></canvas>
+</div>
+
+<!-- ══════════════════════════════════
+     NAVBAR
+══════════════════════════════════ -->
+<nav class="navbar" role="navigation" aria-label="Main navigation">
+  <a href="#" class="nav-brand" onclick="navigate('dashboard');return false;">
+    <div class="nav-brand-mark" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+    </div>
+    <div class="nav-brand-text">MIT BLR <em>Ride Sharing</em></div>
+  </a>
+
+  <!-- Desktop center links -->
+  <ul class="nav-links" id="navLinks" role="list">
+    <li>
+      <a href="#" class="nav-link active" id="navDashboard" onclick="navigate('dashboard');return false;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+    </li>
+    <li>
+      <a href="#" class="nav-link" id="navProfile" onclick="navigate('profile');return false;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </a>
+    </li>
+  </ul>
+
+  <div class="nav-right">
+    <!-- Notification bell -->
+    <button class="nav-icon-btn" id="notifBtn" onclick="toggleNotif()" aria-label="Notifications" aria-expanded="false">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="notif-badge" id="notifBadge">3</span>
+    </button>
+
+    <!-- Avatar + name -->
+    <div class="nav-user" onclick="navigate('profile')">
+      <div class="nav-avatar" id="navAvatar">KU</div>
+      <span class="nav-username" id="navUsername">Kushal</span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted)"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+
+    <!-- Logout -->
+    <button class="btn-logout" onclick="handleLogout()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </button>
+
+    <!-- Hamburger -->
+    <button class="nav-hamburger" id="hamburgerBtn" onclick="toggleMobileNav()" aria-label="Menu">
+      <svg id="hamburgerIcon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Notification panel -->
+  <div class="notif-panel" id="notifPanel">
+    <div class="notif-header">
+      <h3>Notifications</h3>
+      <button class="notif-clear" onclick="clearNotifs()">Mark all read</button>
+    </div>
+    <div class="notif-list" id="notifList"></div>
+  </div>
+</nav>
+
+<!-- Mobile nav drawer -->
+<div class="mobile-nav" id="mobileNav" aria-hidden="true">
+  <a href="#" class="mobile-nav-link active" id="mobileNavDashboard" onclick="navigate('dashboard');toggleMobileNav();return false;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Dashboard
+  </a>
+  <a href="#" class="mobile-nav-link" id="mobileNavProfile" onclick="navigate('profile');toggleMobileNav();return false;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Profile
+  </a>
+  <div class="mobile-nav-divider"></div>
+  <a href="#" class="mobile-nav-link" id="mobileNavCreateRequest" onclick="navigate('create-request');toggleMobileNav();return false;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    Create Ride Request
+  </a>
+  <a href="#" class="mobile-nav-link" id="mobileNavMyRequests" onclick="navigate('my-requests');toggleMobileNav();return false;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    My Ride Requests
+  </a>
+  <a href="#" class="mobile-nav-link" id="mobileNavActiveGroups" onclick="navigate('active-groups');toggleMobileNav();return false;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Active Groups
+  </a>
+  <div class="mobile-nav-divider"></div>
+  <a href="#" class="mobile-nav-link" id="mobileNavNotifications" onclick="toggleMobileNav();toggleNotif();return false;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    Notifications
+  </a>
+  <div class="mobile-nav-footer">
+    <button class="btn-logout" style="width:100%;justify-content:center" onclick="handleLogout()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </button>
+  </div>
+</div>
+
+<!-- Mobile bottom nav -->
+<nav class="mobile-bottom-nav" role="navigation" aria-label="Mobile navigation">
+  <a href="#" class="mbn-item active" id="mbnDashboard" onclick="navigate('dashboard');setActiveMbn('mbnDashboard');return false;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <span>Dashboard</span>
+  </a>
+  <a href="#" class="mbn-item" id="mbnRequests" onclick="navigate('my-requests');setActiveMbn('mbnRequests');return false;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <span>Requests</span>
+  </a>
+  <a href="#" class="mbn-item mbn-create" id="mbnCreate" onclick="navigate('create-request');setActiveMbn('mbnCreate');return false;">
+    <div class="mbn-create-btn">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </div>
+    <span>New</span>
+  </a>
+  <a href="#" class="mbn-item" id="mbnGroups" onclick="navigate('active-groups');setActiveMbn('mbnGroups');return false;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span>Groups</span>
+  </a>
+  <a href="#" class="mbn-item" id="mbnProfile" onclick="navigate('profile');setActiveMbn('mbnProfile');return false;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>Profile</span>
+  </a>
+</nav>
+
+<!-- ══════════════════════════════════
+     PAGE CONTAINER
+══════════════════════════════════ -->
+<main class="page-container" id="pageContainer">
+
+  <!-- ════════════════════════════════
+       PAGE: DASHBOARD
+  ════════════════════════════════ -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-inner">
+
+      <!-- HERO -->
+      <section class="section hero-section">
+        <div class="glass hero-card">
+          <div class="hero-left">
+            <p class="hero-eyebrow" id="heroGreetLine">Good afternoon</p>
+            <h1 class="hero-heading">
+              <span id="heroName">Welcome back</span>
+              <span class="hero-wave">👋</span>
+            </h1>
+            <p class="hero-sub">Let's connect, travel together, and make every journey better.</p>
+            <div class="hero-stats">
+              <div class="hero-stat">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--sky)"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <div>
+                  <div class="hero-stat-val" id="heroOpenRequests">–</div>
+                  <div class="hero-stat-label">Open Requests</div>
+                </div>
+              </div>
+              <div class="hero-stat-divider"></div>
+              <div class="hero-stat">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--success)"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <div>
+                  <div class="hero-stat-val" id="heroActiveGroups">–</div>
+                  <div class="hero-stat-label">Active Groups</div>
+                </div>
+              </div>
+            </div>
+            <div class="hero-actions">
+              <button class="btn btn-blue" onclick="navigate('create-request')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                Create Ride Request
+              </button>
+              <button class="btn btn-outline" onclick="navigate('create-group')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+                Create Share Group
+              </button>
+            </div>
+          </div>
+          <div class="hero-illus" aria-hidden="true">
+            <!-- City + Car SVG -->
+            <svg viewBox="0 0 340 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#0A1628"/>
+                  <stop offset="100%" stop-color="#0D2456"/>
+                </linearGradient>
+                <linearGradient id="carGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#3B82F6"/>
+                  <stop offset="100%" stop-color="#1D4ED8"/>
+                </linearGradient>
+                <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#60A5FA" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="#60A5FA" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <!-- Stars -->
+              <circle cx="40" cy="20" r="1.2" fill="white" opacity=".5"/>
+              <circle cx="90" cy="12" r=".8" fill="white" opacity=".4"/>
+              <circle cx="150" cy="25" r="1" fill="white" opacity=".45"/>
+              <circle cx="220" cy="10" r=".9" fill="white" opacity=".5"/>
+              <circle cx="280" cy="18" r="1.1" fill="white" opacity=".35"/>
+              <circle cx="310" cy="8" r=".7" fill="white" opacity=".4"/>
+              <!-- Buildings left -->
+              <rect x="10" y="60" width="32" height="110" rx="2" fill="#0C1D3E" opacity=".9"/>
+              <rect x="14" y="65" width="8" height="10" rx="1" fill="#60A5FA" opacity=".35"/>
+              <rect x="26" y="65" width="8" height="10" rx="1" fill="#60A5FA" opacity=".5"/>
+              <rect x="14" y="80" width="8" height="10" rx="1" fill="#FDE68A" opacity=".4"/>
+              <rect x="26" y="80" width="8" height="10" rx="1" fill="#60A5FA" opacity=".3"/>
+              <rect x="14" y="95" width="8" height="10" rx="1" fill="#60A5FA" opacity=".5"/>
+              <rect x="26" y="95" width="8" height="10" rx="1" fill="#60A5FA" opacity=".2"/>
+              <polygon points="10,60 26,42 42,60" fill="#091A35" opacity=".95"/>
+              <!-- Buildings center-left -->
+              <rect x="52" y="40" width="38" height="130" rx="2" fill="#0B1C3A" opacity=".9"/>
+              <rect x="56" y="46" width="8" height="10" rx="1" fill="#93C5FD" opacity=".4"/>
+              <rect x="68" y="46" width="8" height="10" rx="1" fill="#93C5FD" opacity=".55"/>
+              <rect x="80" y="46" width="6" height="10" rx="1" fill="#FDE68A" opacity=".45"/>
+              <rect x="56" y="62" width="8" height="10" rx="1" fill="#93C5FD" opacity=".3"/>
+              <rect x="68" y="62" width="8" height="10" rx="1" fill="#FDE68A" opacity=".4"/>
+              <rect x="80" y="62" width="6" height="10" rx="1" fill="#93C5FD" opacity=".35"/>
+              <rect x="56" y="78" width="8" height="10" rx="1" fill="#93C5FD" opacity=".5"/>
+              <rect x="68" y="78" width="8" height="10" rx="1" fill="#93C5FD" opacity=".25"/>
+              <ellipse cx="71" cy="40" rx="19" ry="11" fill="#091A35"/>
+              <!-- Tall center building -->
+              <rect x="130" y="25" width="28" height="145" rx="2" fill="#0C1D3E"/>
+              <rect x="134" y="30" width="6" height="8" rx="1" fill="#60A5FA" opacity=".5"/>
+              <rect x="148" y="30" width="6" height="8" rx="1" fill="#60A5FA" opacity=".6"/>
+              <rect x="134" y="44" width="6" height="8" rx="1" fill="#FDE68A" opacity=".5"/>
+              <rect x="148" y="44" width="6" height="8" rx="1" fill="#60A5FA" opacity=".35"/>
+              <rect x="134" y="58" width="6" height="8" rx="1" fill="#60A5FA" opacity=".45"/>
+              <rect x="148" y="58" width="6" height="8" rx="1" fill="#FDE68A" opacity=".4"/>
+              <rect x="134" y="72" width="6" height="8" rx="1" fill="#60A5FA" opacity=".3"/>
+              <rect x="148" y="72" width="6" height="8" rx="1" fill="#60A5FA" opacity=".5"/>
+              <line x1="144" y1="25" x2="144" y2="12" stroke="#60A5FA" stroke-width="1.5"/>
+              <circle cx="144" cy="12" r="3" fill="#F87171" opacity=".8"/>
+              <!-- Buildings right -->
+              <rect x="220" y="50" width="30" height="120" rx="2" fill="#0B1C3A" opacity=".85"/>
+              <rect x="224" y="55" width="7" height="9" rx="1" fill="#93C5FD" opacity=".45"/>
+              <rect x="235" y="55" width="7" height="9" rx="1" fill="#93C5FD" opacity=".6"/>
+              <rect x="224" y="70" width="7" height="9" rx="1" fill="#FDE68A" opacity=".45"/>
+              <rect x="235" y="70" width="7" height="9" rx="1" fill="#93C5FD" opacity=".3"/>
+              <rect x="224" y="85" width="7" height="9" rx="1" fill="#93C5FD" opacity=".5"/>
+              <polygon points="220,50 235,34 250,50" fill="#091A35"/>
+              <!-- Far-right building -->
+              <rect x="270" y="65" width="40" height="105" rx="2" fill="#0C1D3E" opacity=".8"/>
+              <rect x="275" y="70" width="8" height="10" rx="1" fill="#60A5FA" opacity=".4"/>
+              <rect x="288" y="70" width="8" height="10" rx="1" fill="#FDE68A" opacity=".5"/>
+              <rect x="295" y="70" width="8" height="10" rx="1" fill="#60A5FA" opacity=".35"/>
+              <rect x="275" y="86" width="8" height="10" rx="1" fill="#60A5FA" opacity=".55"/>
+              <rect x="288" y="86" width="8" height="10" rx="1" fill="#60A5FA" opacity=".3"/>
+              <!-- Trees -->
+              <rect x="100" y="148" width="5" height="22" rx="2" fill="#1A2A4A"/>
+              <ellipse cx="102.5" cy="143" rx="14" ry="16" fill="#0D2E1A" opacity=".8"/>
+              <rect x="190" y="152" width="4" height="18" rx="2" fill="#1A2A4A"/>
+              <ellipse cx="192" cy="148" rx="11" ry="12" fill="#0D2E1A" opacity=".75"/>
+              <!-- Location pin -->
+              <ellipse cx="220" cy="70" rx="30" ry="30" fill="url(#glowGrad)"/>
+              <path d="M220 40 C211 40 204 47 204 56 C204 68 220 82 220 82 C220 82 236 68 236 56 C236 47 229 40 220 40Z" fill="#2563EB" opacity=".9"/>
+              <circle cx="220" cy="56" r="7" fill="white" opacity=".9"/>
+              <!-- Road -->
+              <rect x="0" y="165" width="340" height="35" fill="#0A1628"/>
+              <rect x="0" y="165" width="340" height="2.5" fill="#2563EB" opacity=".45"/>
+              <rect x="20"  y="178" width="30" height="3.5" rx="2" fill="white" opacity=".15"/>
+              <rect x="80"  y="178" width="30" height="3.5" rx="2" fill="white" opacity=".15"/>
+              <rect x="140" y="178" width="30" height="3.5" rx="2" fill="white" opacity=".15"/>
+              <rect x="200" y="178" width="30" height="3.5" rx="2" fill="white" opacity=".15"/>
+              <rect x="260" y="178" width="30" height="3.5" rx="2" fill="white" opacity=".15"/>
+              <!-- Car (animated) -->
+              <g class="hero-car-drive">
+                <rect x="145" y="150" width="72" height="22" rx="6" fill="url(#carGrad)"/>
+                <rect x="152" y="140" width="54" height="14" rx="5" fill="#3B82F6"/>
+                <rect x="156" y="142" width="18" height="9" rx="2.5" fill="#DBEAFE" opacity=".7"/>
+                <rect x="178" y="142" width="18" height="9" rx="2.5" fill="#DBEAFE" opacity=".55"/>
+                <circle cx="160" cy="172.5" r="10" fill="#111827"/>
+                <circle cx="160" cy="172.5" r="5"  fill="#60A5FA" opacity=".7"/>
+                <circle cx="198" cy="172.5" r="10" fill="#111827"/>
+                <circle cx="198" cy="172.5" r="5"  fill="#60A5FA" opacity=".7"/>
+                <rect x="215" y="155" width="7" height="5" rx="1.5" fill="#FDE68A" opacity=".95"/>
+                <rect x="145" y="155" width="6" height="5" rx="1.5" fill="#F87171" opacity=".8"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- QUICK ACTIONS -->
+      <section class="section">
+        <div class="section-hd">
+          <h2 class="section-title"><span class="pip"></span>Quick Actions</h2>
+        </div>
+        <div class="qa-grid">
+          <a href="#" class="glass glass-lift qa-card qa-blue" onclick="navigate('create-request');return false;">
+            <div class="qa-icon-wrap qa-icon-blue">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </div>
+            <div class="qa-body">
+              <div class="qa-title">Create Ride Request</div>
+              <div class="qa-desc">Post your travel need and find someone going the same way.</div>
+            </div>
+            <div class="qa-arrow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+          </a>
+          <a href="#" class="glass glass-lift qa-card qa-purple" onclick="navigate('create-group');return false;">
+            <div class="qa-icon-wrap qa-icon-purple">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="qa-body">
+              <div class="qa-title">Create Share Group</div>
+              <div class="qa-desc">Find and connect with students travelling in the same direction.</div>
+            </div>
+            <div class="qa-arrow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+          </a>
+          <a href="#" class="glass glass-lift qa-card qa-green" onclick="navigate('my-requests');return false;">
+            <div class="qa-icon-wrap qa-icon-green">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="qa-body">
+              <div class="qa-title">My Ride Requests</div>
+              <div class="qa-desc">View your past ride requests and their status.</div>
+            </div>
+            <div class="qa-arrow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+          </a>
+          <a href="#" class="glass glass-lift qa-card qa-amber" onclick="navigate('active-groups');return false;">
+            <div class="qa-icon-wrap qa-icon-amber">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/></svg>
+            </div>
+            <div class="qa-body">
+              <div class="qa-title">Active Groups</div>
+              <div class="qa-desc">View and manage your ongoing ride groups.</div>
+            </div>
+            <div class="qa-arrow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- BOTTOM TWO-COL: Recent Requests + Upcoming Groups -->
+      <div class="two-col">
+
+        <!-- Recent Ride Requests -->
+        <section class="section">
+          <div class="section-hd">
+            <h2 class="section-title"><span class="pip"></span>Recent Ride Requests</h2>
+            <a href="#" class="section-link" onclick="navigate('my-requests');return false;">View all</a>
+          </div>
+          <div class="glass requests-table-wrap">
+            <!-- Desktop table -->
+            <table class="requests-table desktop-table">
+              <thead>
+                <tr>
+                  <th>FROM</th><th></th><th>TO</th><th>DATE</th><th>TIME</th><th>STATUS</th>
+                </tr>
+              </thead>
+              <tbody id="recentReqTableBody">
+                <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px 0;">Loading…</td></tr>
+              </tbody>
+            </table>
+            <!-- Mobile cards -->
+            <div class="request-cards mobile-cards" id="recentReqMobileCards">
+              <div class="req-mini-card" style="justify-content:center;color:var(--muted);cursor:default;">Loading…</div>
+            </div>
+            <!-- Empty state (shown when user has no ride requests) -->
+            <div class="dash-empty-state" id="recentReqEmpty" style="display:none;">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z"/></svg>
+              <p>No ride requests yet.</p>
+              <a href="#" class="btn btn-blue" style="margin-top:10px" onclick="navigate('create-request');return false;">Create Ride Request</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Upcoming from Groups -->
+        <section class="section">
+          <div class="section-hd">
+            <h2 class="section-title"><span class="pip"></span>Upcoming (From Your Groups)</h2>
+            <a href="#" class="section-link" onclick="navigate('active-groups');return false;">View all</a>
+          </div>
+          <div class="upcoming-list" id="upcomingGroupsList">
+            <div class="glass upcoming-card" style="justify-content:center;color:var(--muted);cursor:default;">Loading…</div>
+          </div>
+          <!-- Empty state (shown when user has no active groups) -->
+          <div class="dash-empty-state" id="upcomingGroupsEmpty" style="display:none;">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <p>You're not in any ride groups yet.</p>
+            <a href="#" class="btn btn-outline" style="margin-top:10px" onclick="navigate('create-group');return false;">Create Share Group</a>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- SAFETY BANNER -->
+      <section class="section">
+        <div class="glass safety-banner">
+          <div class="safety-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <div class="safety-body">
+            <h3>Travel Safely. Travel Together.</h3>
+            <p>This platform is exclusively for verified <strong>learner.manipal.edu</strong> students. Your safety and trust are our priority.</p>
+          </div>
+          <div class="safety-badge-wrap">
+            <div class="safety-trust-badge">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+              Verified Community
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /page-inner -->
+  </div><!-- /page-dashboard -->
+
+  <!-- ════════════════════════════════
+       PAGE: CREATE RIDE REQUEST
+  ════════════════════════════════ -->
+  <div class="page" id="page-create-request">
+    <div class="page-inner page-inner-narrow">
+      <div class="page-back-bar">
+        <button class="btn-back" onclick="history.go(-1) || navigate('dashboard')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <h2 class="page-title">Create Ride Request</h2>
+      </div>
+      <div class="glass form-card">
+        <div class="form-group">
+          <label class="form-label">From</label>
+          <div class="input-icon-wrap">
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z"/></svg>
+            <input type="text" class="form-input" id="crFrom" placeholder="Search starting point" autocomplete="off"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">To</label>
+          <div class="input-icon-wrap">
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z"/></svg>
+            <input type="text" class="form-input" id="crTo" placeholder="Search destination" autocomplete="off"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <div class="input-icon-wrap">
+              <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <input type="date" class="form-input" id="crDate"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Time</label>
+            <div class="input-icon-wrap">
+              <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <select class="form-input form-select" id="crTime">
+                <option value="">Select time</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes <span class="form-optional">(Optional)</span></label>
+          <textarea class="form-input form-textarea" id="crNotes" placeholder="Any notes for your travel plan..." maxlength="200" oninput="updateCounter('crNotes','crCounter')"></textarea>
+          <div class="char-counter"><span id="crCounter">0</span> / 200</div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-blue btn-full" onclick="createRideRequest()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Post Request
+          </button>
+          <button class="btn btn-outline btn-full" onclick="navigate('dashboard')">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+ <!-- ════════════════════════════════
+       PAGE: CREATE SHARE GROUP
+  ════════════════════════════════ -->
+  <div class="page" id="page-create-group">
+    <div class="page-inner page-inner-narrow">
+      <div class="page-back-bar">
+        <button class="btn-back" onclick="navigate('dashboard')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <h2 class="page-title">Create Share Group</h2>
+      </div>
+ 
+      <!-- My request summary — rendered dynamically by renderSelectedRequest() -->
+      <div class="glass my-req-summary" style="position:relative">
+        <div class="mrs-label">Your Request</div>
+        <div class="mrs-route" id="mrsRoute">
+          <!-- populated by renderSelectedRequest() -->
+        </div>
+        <div class="mrs-meta" id="mrsMeta">
+          <!-- populated by renderSelectedRequest() -->
+        </div>
+        <!-- changes 
+        <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+          <button class="btn-edit-req" id="mrsChangeBtn" onclick="toggleRequestDropdown(event)">
+            Change
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" id="mrsChevron" style="transition:transform .22s"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <button class="btn-edit-req" onclick="navigate('create-request')">Edit</button>
+        </div>
+        -->
+        <div class="my-req-actions">
+        <button class="btn-edit-req" id="mrsChangeBtn" onclick="toggleRequestDropdown(event)">
+          Change<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" id="mrsChevron" style="transition:transform .22s"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <button
+    class="btn-edit-req"
+    id="editRequestBtn"
+    onclick="editSelectedRequest()">
+    Edit
+</button>
+        </div>
+ 
+        <!-- Custom request dropdown -->
+        <div class="req-dropdown" id="reqDropdown" style="display:none">
+          <div class="req-dropdown-inner" id="reqDropdownList">
+            <!-- populated by renderRequestDropdown() -->
+          </div>
+        </div>
+      </div>
+      
+<!-- ── STATUS BAR ── -->
+      <div class="cg-status-bar glass" id="cgStatusBar">
+        <div class="csb-step active" id="csbLooking">
+          <span class="csb-dot" style="background:var(--success)"></span>
+          Looking for Group
+        </div>
+        <div class="csb-divider"></div>
+        <div class="csb-step" id="csbPending">
+          <span class="csb-dot" style="background:var(--amber)"></span>
+          Requests Pending
+        </div>
+        <div class="csb-divider"></div>
+        <div class="csb-step" id="csbActive">
+          <span class="csb-dot" style="background:var(--sky)"></span>
+          In Active Group
+        </div>
+        
+      </div>
+      <!-- ════════════════════════
+           SECTION 1 — MATCHING STUDENTS
+           "I want to create a new group"
+      ════════════════════════ -->
+      <div class="cg-section">
+        <div class="cg-section-label cg-label-create">
+          <div class="cg-section-label-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div>
+            <div class="cg-section-title">Matching Students</div>
+            <div class="cg-section-sub">Students with similar route &amp; timing (±15 mins) not yet in any group</div>
+          </div>
+        </div>
+
+        <!-- student cards rendered here -->
+        <div class="matching-list" id="matchingList"></div>
+
+        <!-- Continue button — hidden until ≥1 selected -->
+        <div id="cgContinueWrap" style="margin-top:18px;display:none">
+          <button class="btn btn-blue btn-full" id="cgContinueBtn" onclick="openGroupSizeModal()">
+            Continue
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- divider between the two sections -->
+      <div class="cg-or-divider">
+        <span class="cg-or-line"></span>
+        <span class="cg-or-label">OR</span>
+        <span class="cg-or-line"></span>
+      </div>
+
+      <!-- ════════════════════════
+           SECTION 2 — MATCHING GROUPS
+           "I want to join an existing group"
+      ════════════════════════ -->
+      <div class="cg-section cg-section-join">
+        <div class="cg-section-label cg-label-join">
+          <div class="cg-section-label-icon cg-icon-join">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect x="9" y="11" width="14" height="10" rx="2"/><circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/></svg>
+          </div>
+          <div>
+            <div class="cg-section-title">Matching Groups</div>
+            <div class="cg-section-sub">Groups on the same route &amp; time looking for additional members</div>
+          </div>
+        </div>
+
+        <!-- group cards rendered here -->
+        <div class="mg-list" id="matchingGroupsList"></div>
+      </div>
+
+    </div><!-- /page-inner -->
+  </div><!-- /page-create-group -->
+
+  <!-- ════════════════════════════════
+       MODAL: GROUP SIZE
+  ════════════════════════════════ -->
+  <div class="modal-overlay" id="modalGroupSize" onclick="closeModalGroupSize(event)" role="dialog" aria-modal="true" aria-labelledby="mgsTitle">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title" id="mgsTitle">Confirm Group</h3>
+        <button class="modal-close" onclick="closeModalGroupSize()" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <p class="modal-desc">Choose the maximum number of members for your group (including you).</p>
+
+      <!-- Group size picker -->
+      <div class="modal-field-label">Preferred Group Size</div>
+      <div class="size-picker" id="sizePicker">
+        <button class="size-opt" data-size="2" onclick="pickGroupSize(2)">2</button>
+        <button class="size-opt" data-size="3" onclick="pickGroupSize(3)">3</button>
+        <button class="size-opt active" data-size="4" onclick="pickGroupSize(4)">4</button>
+        <button class="size-opt" data-size="5" onclick="pickGroupSize(5)">5</button>
+      </div>
+
+      <!-- Selected students chips -->
+      <div class="modal-field-label" style="margin-top:20px">Selected Students</div>
+      <div class="selected-chips" id="selectedChips">
+        <!-- populated by openGroupSizeModal() -->
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModalGroupSize()">Cancel</button>
+        <button class="btn btn-blue" onclick="sendGroupRequests()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Send Requests
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       MODAL: JOIN GROUP CONFIRM
+  ════════════════════════════════ -->
+  <div class="modal-overlay" id="modalJoinGroup" onclick="closeModalJoin(event)" role="dialog" aria-modal="true" aria-labelledby="mjTitle">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title" id="mjTitle">Join this Group?</h3>
+        <button class="modal-close" onclick="closeModalJoin()" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Group summary shown inside modal -->
+      <div class="join-modal-group-card glass" id="joinModalGroupCard">
+        <!-- populated by openJoinModal() -->
+      </div>
+
+      <div class="join-modal-notice">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;color:var(--amber)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <p>You are requesting to join this ride group. If the group accepts your request, you will automatically become part of this group and will no longer be able to create or join another group for this ride request.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeModalJoin()">Cancel</button>
+        <button class="btn btn-blue" onclick="sendJoinRequest()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Send Request
+        </button>
+      </div>
+    </div>
+  </div>
+ 
+  
+  <!-- ════════════════════════════════
+       PAGE: MY RIDE REQUESTS
+  ════════════════════════════════ -->
+  <div class="page" id="page-my-requests">
+    <div class="page-inner">
+
+      <!-- Header -->
+      <div class="page-back-bar">
+        <button class="btn-back" onclick="navigate('dashboard')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <h2 class="page-title">My Ride Requests</h2>
+      </div>
+
+      <!-- Segmented control: Active Requests / Ride History -->
+      <div class="seg-control-wrap">
+        <div class="seg-control" id="mrSegControl">
+          <button class="seg-btn active" id="segActiveBtn" onclick="switchMrTab('active', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Active Requests
+          </button>
+          <button class="seg-btn" id="segHistoryBtn" onclick="switchMrTab('history', this)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/></svg>
+            Ride History
+          </button>
+        </div>
+      </div>
+
+      <!-- ── ACTIVE REQUESTS TAB ── -->
+      <div id="mrTabActive">
+
+        <!-- Sub-section 1: Pending Invitations -->
+        <div class="mr-sub-section" id="invitationsSection">
+          <div class="mr-sub-header">
+            <div class="mr-sub-title">
+              <span class="mr-sub-pip" style="background:var(--amber)"></span>
+              Pending Invitations
+            </div>
+            <span class="mr-sub-count badge badge-amber" id="invitationCount">0</span>
+          </div>
+          <div class="mr-list" id="invitationsList">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+        <!-- Sub-section 2: Your Active Ride Requests -->
+        <div class="mr-sub-section" id="activeRequestsSection">
+          <div class="mr-sub-header">
+            <div class="mr-sub-title">
+              <span class="mr-sub-pip" style="background:var(--sky)"></span>
+              Your Active Ride Requests
+            </div>
+            <span class="mr-sub-count badge badge-blue" id="activeReqCount">0</span>
+          </div>
+          <div class="mr-list" id="activeRequestsList">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+      </div><!-- /mrTabActive -->
+
+      <!-- ── RIDE HISTORY TAB ── -->
+      <div id="mrTabHistory" style="display:none">
+        <div class="mr-sub-section">
+          <div class="mr-sub-header">
+            <div class="mr-sub-title">
+              <span class="mr-sub-pip" style="background:var(--success)"></span>
+              Completed Rides
+            </div>
+          </div>
+          <div class="mr-list" id="historyList">
+            <!-- populated by JS -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       PAGE: ACTIVE GROUPS
+  ════════════════════════════════ -->
+  <div class="page" id="page-active-groups">
+    <div class="page-inner">
+
+      <div class="page-back-bar">
+        <button class="btn-back" onclick="navigate('dashboard')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <h2 class="page-title">Active Groups</h2>
+      </div>
+
+      <!-- Group list — each group is one large glass container -->
+      <div class="ag-list" id="activeGroupsList">
+        <!-- populated by JS -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       MODAL: DELETE RIDE REQUEST
+  ════════════════════════════════ -->
+  <div class="modal-overlay" id="modalDeleteRequest" onclick="closeDeleteModal(event)" role="dialog" aria-modal="true">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title" id="deleteModalTitle">Delete Ride Request</h3>
+        <button class="modal-close" onclick="closeDeleteModal()" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="delete-modal-icon" id="deleteModalIcon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+      </div>
+      <p class="modal-desc" id="deleteModalMsg"></p>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn btn-danger" id="deleteModalConfirmBtn" onclick="confirmDeleteRequest()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       MODAL: LEAVE GROUP
+  ════════════════════════════════ -->
+  <div class="modal-overlay" id="modalLeaveGroup" onclick="closeLeaveModal(event)" role="dialog" aria-modal="true">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Leave Group</h3>
+        <button class="modal-close" onclick="closeLeaveModal()" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="delete-modal-icon" style="background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.2);color:var(--error)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </div>
+      <p class="modal-desc">Are you sure you want to leave this ride group? Leaving will free one seat in the group and you will no longer be a member.</p>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeLeaveModal()">Cancel</button>
+        <button class="btn btn-danger" onclick="confirmLeaveGroup()">Leave Group</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       MODAL: WHATSAPP LINK
+  ════════════════════════════════ -->
+  <div class="modal-overlay" id="modalWhatsapp" onclick="closeWhatsappModal(event)" role="dialog" aria-modal="true">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Group WhatsApp Link</h3>
+        <button class="modal-close" onclick="closeWhatsappModal()" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <p class="modal-desc">Any member of the group can add or update the WhatsApp group link. This ensures everyone always has access to the latest group link.</p>
+      <div class="wa-input-wrap">
+        <svg class="wa-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#25D366"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        <input type="url" class="form-input wa-link-input" id="waLinkInput" placeholder="Enter WhatsApp group link..."/>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeWhatsappModal()">Cancel</button>
+        <button class="btn btn-wa" id="waSubmitBtn" onclick="saveWhatsappLink()">Add Link</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════════════════════════════
+       PAGE: PROFILE
+  ════════════════════════════════ -->
+  <div class="page" id="page-profile">
+    <div class="page-inner page-inner-narrow">
+      <div class="page-back-bar">
+        <button class="btn-back" onclick="navigate('dashboard')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <h2 class="page-title">Profile</h2>
+      </div>
+      <div class="glass profile-avatar-card">
+        <div class="profile-avatar-large" id="profileAvatarLarge">KU</div>
+        <div class="profile-name-display" id="profileNameDisplay">Kushal</div>
+        <div class="profile-email-display" id="profileEmailDisplay"></div>
+        <div class="profile-verify-badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          MIT Verified
+        </div>
+      </div>
+      <div class="glass form-card">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-input" id="profileName" placeholder="Your full name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="profileEmail" placeholder="yourname@learner.manipal.edu" disabled/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" class="form-input" id="profilePhone" placeholder="+91 XXXXX XXXXX"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hostel/Room No.</label>
+          <input type="text" class="form-input" id="profileBlock" placeholder="e.g. Block A, Room 204"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Year &amp; Branch</label>
+          <input type="text" class="form-input" id="profileYear" placeholder="e.g. 3rd Year · CSE"/>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-blue btn-full" onclick="saveProfile()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       MODAL: LOGOUT CONFIRMATION
+  ════════════════════════════════ -->
+  <div class="modal-overlay" id="modalLogout" onclick="closeLogoutModal(event)" role="dialog" aria-modal="true" aria-labelledby="logoutModalTitle">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title" id="logoutModalTitle">Logout</h3>
+        <button class="modal-close" onclick="closeLogoutModal()" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="delete-modal-icon" style="background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.2);color:var(--error)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </div>
+      <p class="modal-desc">Are you sure you want to logout?</p>
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeLogoutModal()">Cancel</button>
+        <button class="btn btn-danger" onclick="confirmLogout()">Logout</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── FOOTER ── -->
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-mark">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      MIT BLR <em>Ride Sharing</em>
+    </div>
+    <ul class="footer-links">
+      <li><a href="#">About</a></li>
+      <li><a href="#">Contact</a></li>
+      <li><a href="#">Terms</a></li>
+      <li><a href="#">Privacy Policy</a></li>
+    </ul>
+    <p class="footer-copy">MIT BLR Ride Sharing © 2026</p>
+  </div>
+</footer>
+
+<script src="dashboard.js"></script>
+</body>
+</html>
