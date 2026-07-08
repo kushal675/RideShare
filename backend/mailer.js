@@ -14,7 +14,9 @@ let transporterPromise = null;
 
 async function buildTransporter() {
     const addresses = await dnsPromises.resolve4("smtp.gmail.com");
-    const ipv4Host = addresses[0];
+console.log(addresses);
+
+const ipv4Host = addresses[0];
 
     const transporter = nodemailer.createTransport({
         host: ipv4Host,
