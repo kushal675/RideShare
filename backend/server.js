@@ -11,7 +11,6 @@ dns.setDefaultResultOrder("ipv4first");
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
-const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
 const bcrypt = require("bcryptjs");
@@ -19,7 +18,7 @@ const { createClient } = require("@supabase/supabase-js");
 const crypto = require("crypto");
 const JWT_SECRET = process.env.JWT_SECRET;
 const app = express();
-
+const {sendOTPEmail,sendForgotPasswordOTP} = require("./email");
 app.set("trust proxy", 1);
 
 const allowedOrigins = [
@@ -460,12 +459,7 @@ if (
 
         const transporter = await getTransporter();
 
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: "RideShare OTP",
-            html: `<h2>Your OTP is ${otp}</h2>`
-        });
+        await sendOTPEmail(email, otp);
 
         console.log("Email sent successfully");
 
@@ -849,17 +843,7 @@ app.post("/send-forgot-otp", otpLimiter, async (req, res) => {
 
         const transporter = await getTransporter();
 
-        await transporter.sendMail({
-            from:
-                process.env.EMAIL_USER,
-            to: email,
-            subject:
-                "RideShare Password Reset OTP",
-            html: `
-                <h2>Your OTP is</h2>
-                <h1>${otp}</h1>
-            `
-        });
+        await sendForgotPasswordOTP(email, otp);
 
         res.json({
             success: true
