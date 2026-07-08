@@ -1,5 +1,13 @@
 require("dotenv").config();
 
+const net = require("net");
+
+if (net.setDefaultAutoSelectFamily) {
+    net.setDefaultAutoSelectFamily(false);
+}
+
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first");
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
@@ -11,11 +19,6 @@ const { createClient } = require("@supabase/supabase-js");
 const crypto = require("crypto");
 const JWT_SECRET = process.env.JWT_SECRET;
 const app = express();
-
-const dns = require("dns");
-console.log("EMAIL_USER:", process.env.EMAIL_USER);
-console.log("EMAIL_PASS exists:", !!process.env.EMAIL_PASS);
-dns.setDefaultResultOrder("ipv4first");
 
 app.set("trust proxy", 1);
 
@@ -89,19 +92,25 @@ const supabase = createClient(
     process.env.SUPABASE_URL,
     process.env.SUPABASE_KEY
 );
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    },
-    connectionTimeout: 30000,
-    greetingTimeout: 30000,
-    socketTimeout: 30000
-});
+const dnsPromises = require("dns").promises;
 
+async function createTransporter() {
+    const [ipv4] = await dnsPromises.resolve4("smtp.gmail.com");
+
+    return nodemailer.createTransport({
+        host: ipv4,
+        port: 465,
+        secure: true,
+        tls: {
+            servername: "smtp.gmail.com"
+        },
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+}
+const transporter = await createTransporter();
 transporter.verify(function (error, success) {
     if (error) {
         console.error("SMTP VERIFY FAILED");
