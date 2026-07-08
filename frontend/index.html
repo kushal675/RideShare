@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MAHE BLR Ride Sharing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+  <!-- Ambient background blobs -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <!-- Floating particle dots -->
+  <div class="dots-canvas" id="dotsCanvas"></div>
+
+  <!-- Login Card -->
+  <div class="card" role="main">
+
+    <!-- Illustration + Branding -->
+    <div class="illus-wrap">
+      <!-- Inline SVG campus ride scene -->
+      <svg class="scene-svg" viewBox="0 0 200 88" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- Sky gradient -->
+        <defs>
+          <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#1E3A6B" stop-opacity="0"/>
+            <stop offset="100%" stop-color="#1E3A6B" stop-opacity="0"/>
+          </linearGradient>
+          <!-- Road gradient -->
+          <linearGradient id="roadGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#0F1F4A"/>
+            <stop offset="50%" stop-color="#1A2F6A"/>
+            <stop offset="100%" stop-color="#0F1F4A"/>
+          </linearGradient>
+          <!-- Car body gradient -->
+          <linearGradient id="carGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#60A5FA"/>
+            <stop offset="100%" stop-color="#2563EB"/>
+          </linearGradient>
+          <!-- Headlight glow -->
+          <radialGradient id="headGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#FDE68A" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="#FDE68A" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Campus buildings (background) -->
+        <!-- Building 1 -->
+        <rect x="8" y="34" width="22" height="32" rx="1" fill="#132654" opacity="0.8"/>
+        <rect x="11" y="37" width="4" height="5" rx="0.5" fill="#60A5FA" opacity="0.5"/>
+        <rect x="17" y="37" width="4" height="5" rx="0.5" fill="#60A5FA" opacity="0.3"/>
+        <rect x="11" y="45" width="4" height="5" rx="0.5" fill="#60A5FA" opacity="0.6"/>
+        <rect x="17" y="45" width="4" height="5" rx="0.5" fill="#60A5FA" opacity="0.2"/>
+        <!-- Building 1 roof -->
+        <polygon points="8,34 19,24 30,34" fill="#0D1E47" opacity="0.9"/>
+        <!-- Flag on building 1 -->
+        <line x1="19" y1="24" x2="19" y2="18" stroke="#60A5FA" stroke-width="1"/>
+        <rect x="19" y="18" width="7" height="4" rx="0.5" fill="#F59E0B" opacity="0.85"/>
+
+        <!-- Building 2 (taller) -->
+        <rect x="36" y="22" width="18" height="44" rx="1" fill="#0F1D42" opacity="0.75"/>
+        <rect x="39" y="26" width="3" height="4" rx="0.5" fill="#93C5FD" opacity="0.45"/>
+        <rect x="44" y="26" width="3" height="4" rx="0.5" fill="#93C5FD" opacity="0.6"/>
+        <rect x="39" y="33" width="3" height="4" rx="0.5" fill="#93C5FD" opacity="0.3"/>
+        <rect x="44" y="33" width="3" height="4" rx="0.5" fill="#93C5FD" opacity="0.5"/>
+        <rect x="39" y="40" width="3" height="4" rx="0.5" fill="#93C5FD" opacity="0.55"/>
+        <rect x="44" y="40" width="3" height="4" rx="0.5" fill="#FDE68A" opacity="0.6"/>
+        <!-- Dome on building 2 -->
+        <ellipse cx="45" cy="22" rx="9" ry="6" fill="#0D1E47" opacity="0.9"/>
+        <ellipse cx="45" cy="22" rx="5" ry="3.5" fill="#1E3A6B" opacity="0.8"/>
+
+        <!-- Tree left -->
+        <rect x="2" y="60" width="3" height="8" rx="1" fill="#1A2A4A"/>
+        <ellipse cx="3.5" cy="57" rx="7" ry="8" fill="#133D2A" opacity="0.75"/>
+        <!-- Tree right of building 2 -->
+        <rect x="57" y="60" width="3" height="8" rx="1" fill="#1A2A4A"/>
+        <ellipse cx="58.5" cy="57" rx="6" ry="7" fill="#133D2A" opacity="0.65"/>
+
+        <!-- Stars -->
+        <circle cx="80" cy="10" r="1" fill="white" opacity="0.5"/>
+        <circle cx="110" cy="6" r="0.8" fill="white" opacity="0.4"/>
+        <circle cx="145" cy="12" r="1.1" fill="white" opacity="0.55"/>
+        <circle cx="175" cy="8" r="0.8" fill="white" opacity="0.35"/>
+        <circle cx="190" cy="15" r="1" fill="white" opacity="0.4"/>
+        <circle cx="130" cy="4" r="0.6" fill="white" opacity="0.5"/>
+        <circle cx="165" cy="18" r="0.7" fill="white" opacity="0.3"/>
+
+        <!-- Road surface -->
+        <rect x="0" y="66" width="200" height="22" fill="url(#roadGrad)"/>
+        <!-- Road border top -->
+        <rect x="0" y="66" width="200" height="1.5" fill="#2563EB" opacity="0.4"/>
+        <!-- Center dashes -->
+        <rect x="10"  y="76" width="18" height="2" rx="1" fill="white" opacity="0.25"/>
+        <rect x="40"  y="76" width="18" height="2" rx="1" fill="white" opacity="0.25"/>
+        <rect x="70"  y="76" width="18" height="2" rx="1" fill="white" opacity="0.25"/>
+        <rect x="100" y="76" width="18" height="2" rx="1" fill="white" opacity="0.25"/>
+        <rect x="130" y="76" width="18" height="2" rx="1" fill="white" opacity="0.25"/>
+        <rect x="160" y="76" width="18" height="2" rx="1" fill="white" opacity="0.25"/>
+
+        <!-- Headlight cone (subtle glow before car) -->
+        <ellipse cx="78" cy="73" rx="18" ry="5" fill="url(#headGlow)" opacity="0.45"/>
+
+        <!-- Animated Car Group -->
+        <g class="car-group">
+          <!-- Car body -->
+          <rect x="82" y="60" width="38" height="14" rx="4" fill="url(#carGrad)"/>
+          <!-- Cabin roof -->
+          <rect x="88" y="53" width="26" height="10" rx="4" fill="#3B82F6"/>
+          <!-- Windows -->
+          <rect x="91" y="55" width="9" height="6" rx="2" fill="#DBEAFE" opacity="0.75"/>
+          <rect x="103" y="55" width="9" height="6" rx="2" fill="#DBEAFE" opacity="0.6"/>
+          <!-- Wheels -->
+          <circle cx="92"  cy="74.5" r="5.5" fill="#1E293B"/>
+          <circle cx="92"  cy="74.5" r="2.5" fill="#60A5FA" opacity="0.7"/>
+          <circle cx="110" cy="74.5" r="5.5" fill="#1E293B"/>
+          <circle cx="110" cy="74.5" r="2.5" fill="#60A5FA" opacity="0.7"/>
+          <!-- Headlight -->
+          <rect x="118" y="64" width="4" height="3" rx="1" fill="#FDE68A" opacity="0.9"/>
+          <!-- Tail light -->
+          <rect x="82"  y="64" width="3" height="3" rx="1" fill="#F87171" opacity="0.8"/>
+          <!-- MIT text on car -->
+          <text x="94" y="70" font-family="Poppins, Arial" font-size="5.5" font-weight="700" fill="white" opacity="0.85">MIT</text>
+        </g>
+      </svg>
+
+      <div class="brand-block">
+        <p class="brand-eyebrow">MIT — Bengaluru</p>
+        <h1 class="brand-title">Ride <span>Sharing</span> Portal</h1>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <p class="form-label">Sign in to your account</p>
+
+    <div class="field-group">
+
+      <!-- Email field -->
+      <div class="field" id="fieldEmail">
+        <svg class="field-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+        </svg>
+        <input type="email" id="email" placeholder="College email address" autocomplete="email"/>
+        <p class="field-error-msg">Please enter a valid email.</p>
+      </div>
+
+      <!-- Password field -->
+      <div class="field" id="fieldPassword">
+        <svg class="field-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <input type="password" id="password" placeholder="Password" autocomplete="current-password"/>
+        <button class="toggle-pw" type="button" onclick="togglePassword()" aria-label="Toggle password visibility" tabindex="-1">
+          <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+        <p class="field-error-msg">Password cannot be empty.</p>
+      </div>
+
+    </div>
+
+    <!-- Forgot password -->
+    <div class="forgot-row">
+      <a href="forgotpassword.html">Forgot Password?</a>
+    </div>
+
+    <!-- Login button -->
+    <button class="btn-login" type="button" onclick="login()" id="loginBtn">
+      <span>
+        <span class="btn-text">Login to my ride</span>
+        <span class="btn-spinner"><span class="spinner"></span></span>
+      </span>
+    </button>
+
+    <!-- Divider -->
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span class="divider-text">New to MIT BLR Rides?</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- Sign up -->
+    <p class="signup-row">
+      <a href="signup.html">Create an account →</a>
+    </p>
+
+    <!-- Feedback message -->
+    <p id="message" role="alert" aria-live="polite"></p>
+
+    <!-- Trust badges -->
+    <div class="trust-row">
+      <span class="trust-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Secure login
+      </span>
+      <span class="trust-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        MIT verified
+      </span>
+      <span class="trust-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Students only
+      </span>
+    </div>
+
+  </div>
+
+    <script src="login.js"></script>
+
+</body>
+</html>
