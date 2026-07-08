@@ -4,9 +4,9 @@
   "description": "",
   "main": "script.js",
   "scripts": {
-  "start": "node server.js",
-  "test": "echo \"Error: no test specified\" && exit 1"
-},
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -23,6 +23,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^7.3.0",
     "mongoose": "^9.7.1",
-    "nodemailer": "^9.0.1"
+    "nodemailer": "^9.0.1",
+    "resend": "^6.17.1"
   }
 }
