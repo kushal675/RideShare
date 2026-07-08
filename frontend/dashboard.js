@@ -1083,7 +1083,7 @@ updateBtn.innerHTML = `
     console.log("editingRequestId =", editingRequestId);
     try {
 
-        const response = await apiFetch(`https://rideshare-backend-uv0p.onrender.com/ride-request`, {
+        const response = await apiFetch(`https://rideshare-backend-uv0p.onrender.com/ride-request/${editingRequestId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
