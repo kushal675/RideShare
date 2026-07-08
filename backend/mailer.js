@@ -20,7 +20,7 @@ const ipv4Host = addresses[0];
 
     const transporter = nodemailer.createTransport({
         host: ipv4Host,
-        port: 465,
+        port: 587,
         secure: true,
         tls: {
             servername: "smtp.gmail.com"
