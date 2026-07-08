@@ -92,8 +92,6 @@ const supabase = createClient(
     process.env.SUPABASE_KEY
 );
 
-const { getTransporter } = require("./mailer");
-
 /* ============================================
    JWT HELPERS
 ============================================ */
@@ -456,8 +454,6 @@ if (
     try {
 
         console.log("About to send email...");
-
-        const transporter = await getTransporter();
 
         await sendOTPEmail(email, otp);
 
@@ -840,8 +836,6 @@ app.post("/send-forgot-otp", otpLimiter, async (req, res) => {
                     5 * 60 * 1000
             };
         }
-
-        const transporter = await getTransporter();
 
         await sendForgotPasswordOTP(email, otp);
 
