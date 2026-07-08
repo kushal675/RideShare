@@ -1346,7 +1346,6 @@ async function acceptInvitation(id) {
 
     console.log(inv);
     console.log({
-    userId,
     groupId: inv.groupId
 });
     const response = await apiFetch(
