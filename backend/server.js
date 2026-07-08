@@ -299,8 +299,7 @@ async function updateCompletedRides() {
             if (!creatorRide)
                 continue;
 
-            const rideDateTime = new Date(
-                `${creatorRide.ride_date}T${creatorRide.ride_time}`
+            const rideDateTime = new Date(`${creatorRide.ride_date}T${creatorRide.ride_time}+05:30`
             );
 
             rideDateTime.setHours(
