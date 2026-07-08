@@ -2424,7 +2424,74 @@ app.post("/accept-join-request", requireAuth, async (req, res) => {
             .eq("type", "join_request")
             .eq("status", "pending")
             .neq("id", request.id);
+            //--------------------------------------------------
+            // Remove sender's old pending group (if any)
+            //--------------------------------------------------
 
+            const { data: oldGroup } = await supabase
+                .from("groups")
+                .select("*")
+                .eq("ride_request_id", request.sender_request_id)
+                .neq("id", group.id)
+                .maybeSingle();
+
+            if (oldGroup) {
+
+                const { data: oldRequests } = await supabase
+                    .from("group_request")
+                    .select("*")
+                    .eq("group_id", oldGroup.id);
+
+                for (const oldRequest of oldRequests || []) {
+
+                    if (oldRequest.status !== "pending")
+                        continue;
+
+                    if (oldRequest.type === "invitation") {
+
+                        await removePendingNotification({
+
+                            userId: oldRequest.receiver_id,
+
+                            type: "INVITATION_RECEIVED",
+
+                            groupId: oldRequest.group_id,
+
+                            rideRequestId: oldRequest.receiver_request_id
+
+                        });
+
+                    }
+
+                    else if (oldRequest.type === "join_request") {
+
+                        await removePendingNotification({
+
+                            userId: oldRequest.receiver_id,
+
+                            type: "JOIN_REQUEST",
+
+                            groupId: oldRequest.group_id,
+
+                            rideRequestId: oldRequest.sender_request_id
+
+                        });
+
+                    }
+
+                }
+
+                await supabase
+                    .from("group_request")
+                    .delete()
+                    .eq("group_id", oldGroup.id);
+
+                await supabase
+                    .from("groups")
+                    .delete()
+                    .eq("id", oldGroup.id);
+
+            }
         //--------------------------------------------------
         // Group becomes active after first accepted member
         //--------------------------------------------------
@@ -2949,6 +3016,22 @@ await supabase
     .eq("sender_request_id", invitation.receiver_request_id)
     .eq("status", "pending")
     .eq("type", "join_request");
+const { data: oldGroup } = await supabase
+    .from("groups")
+    .select("*")
+    .eq("ride_request_id", invitation.receiver_request_id)
+    .neq("id", groupId)
+    .maybeSingle();
+if (oldGroup) {
+await supabase
+    .from("group_request")
+    .delete()
+    .eq("group_id", oldGroup.id);
+await supabase
+    .from("groups")
+    .delete()
+    .eq("id", oldGroup.id);
+}
 //------------------------------------------------
 // Count members
 //------------------------------------------------
@@ -3568,7 +3651,7 @@ for (const invite of invitations) {
 
                     groupSummary = {
 
-                        currentMembers: (count || 0) + 1,
+                        currentMembers: (count || 0),
 
                         max_members: creatorGroup.max_members
 
@@ -3613,7 +3696,7 @@ for (const invite of invitations) {
 
                     groupSummary = {
 
-                        currentMembers: (count || 0) + 1,
+                        currentMembers: (count || 0),
 
                         max_members: membership.groups.max_members
 
