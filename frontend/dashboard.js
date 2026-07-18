@@ -2920,7 +2920,7 @@ function renderMatchingStudents() {
             <p>No matching students yet</p>
 
             <span>
-                Students who post the same route within ±15 mins will appear here
+                Students who post the same route within ±30 mins will appear here
             </span>
 
         </div>
@@ -3001,7 +3001,7 @@ function renderMatchingStudents() {
 
                 &nbsp;·&nbsp;
 
-                ±15 min match
+                ±30 min match
 
             </div>
 
