@@ -115,7 +115,7 @@ console.log("signup.js loaded");
     } else {
 
         showMessage(
-            "Failed to send OTP",
+            data.message || "Failed to send OTP",
             "error"
         );
     }
@@ -201,7 +201,7 @@ console.log("signup.js loaded");
         console.log(err);
 
         showMessage(
-            "Server Error",
+            err.message || "Server Error",
             "error"
         );
     }
@@ -289,10 +289,10 @@ console.log("signup.js loaded");
         btn.classList.remove('loading');
 
         showMessage(
-            "Server Error",
+            err.message || "Server Error",
             "error"
-        )};
-}
+        );
+    }
     /* Password strength */
     const colors = { 1:'#F87171', 2:'#FBBF24', 3:'#60A5FA', 4:'#34D399' };
     const labels = { 1:'Weak', 2:'Fair', 3:'Good', 4:'Strong' };
@@ -379,16 +379,16 @@ console.log("signup.js loaded");
             );
         }
 
-    } catch (err) {
+    } catch (err ) {
 
         console.log(err);
         btn.disabled = false;
         btn.classList.remove('loading');
 
         showMessage(
-            "Server Error",
+            err.message || "Server Error",
             "error"
-        )};
+        );
     }
 
     /* Toggle password */
@@ -410,3 +410,4 @@ console.log("signup.js loaded");
       else if (currentStep===2) verifyOtp();
       else if (currentStep===3) signup();
     });
+    }}
