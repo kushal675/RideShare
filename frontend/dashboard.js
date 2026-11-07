@@ -125,6 +125,10 @@ function navigate(pageId) {
   const target = document.getElementById('page-' + pageId);
   if (!target) { console.warn('Page not found:', pageId); return; }
 
+  if (State.currentPage === 'create-request' && pageId !== 'create-request') {
+    resetRideRequestForm();
+  }
+
   // Push history
   if (State.currentPage !== pageId) {
     State.pageHistory.push(State.currentPage);
@@ -840,10 +844,25 @@ function initCreateForm() {
   initPlacesAutocomplete('crTo');
 }
 
+function resetRideRequestForm() {
+  editingRideRequest = false;
+  editingRequestId = null;
+  for (const id of ['crFrom', 'crTo', 'crDate', 'crTime', 'crNotes']) {
+    const input = document.getElementById(id);
+    if (input) input.value = '';
+  }
+  updateCounter('crNotes', 'crCounter');
+  const title = document.querySelector('#page-create-request .page-title');
+  const button = document.querySelector('#page-create-request .btn-blue');
+  if (title) title.textContent = 'Create Ride Request';
+  if (button) button.textContent = 'Post Request';
+}
+
 /* Simulated Google Places autocomplete */
 const PLACES = [
   'MAHE BLR Campus',
-  'Kempegowda International Airport',
+  'Kempegowda International Airport Terminal 1',
+  'Kempegowda International Airport Terminal 2',
   'Majestic (KSR Railway Station)',
   'Whitefield',
   'Electronic City',
@@ -962,29 +981,12 @@ let updatingRideRequest = false;
 async function createRideRequest() {
   console.log("BUTTON CLICKED");
   if (creatingRideRequest) return;
-
-creatingRideRequest = true;
-
-const submitBtn = document.querySelector("#page-create-request .btn-blue");
-const originalBtnHTML = submitBtn.innerHTML;
-
-submitBtn.disabled = true;
-submitBtn.innerHTML = `
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="2.5"
-         stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-    </svg>
-    Posting...
-`;
+  if (editingRideRequest) return updateRideRequest();
   const source  = (document.getElementById('crFrom')?.value || '').trim();
   const destination    = (document.getElementById('crTo')?.value || '').trim();
   const ride_date  = document.getElementById('crDate')?.value || '';
   const ride_time  = document.getElementById('crTime')?.value || '';
   const notes = (document.getElementById('crNotes')?.value || '').trim();
-  if (editingRideRequest) {
-    return updateRideRequest();
-  }
   if (!source) { showToast('Please enter a starting point', 'error'); return; }
   if (!destination)   { showToast('Please enter a destination',    'error'); return; }
   if (!ride_date) { showToast('Please select a date',          'error'); return; }
@@ -1010,6 +1012,11 @@ submitBtn.innerHTML = `
         return;
     }
 }
+creatingRideRequest = true;
+const submitBtn = document.querySelector("#page-create-request .btn-blue");
+const originalBtnHTML = submitBtn.innerHTML;
+submitBtn.disabled = true;
+submitBtn.textContent = 'Posting...';
   console.log({
     source,
     destination,
@@ -1064,7 +1071,7 @@ finally{
     creatingRideRequest = false;
 
     submitBtn.disabled = false;
-    submitBtn.innerHTML = originalBtnHTML;
+    if (State.currentPage === 'create-request') submitBtn.innerHTML = originalBtnHTML;
 
 }
 }
@@ -1156,7 +1163,7 @@ navigate("create-group");
 
     updateBtn.disabled = false;
 
-    updateBtn.innerHTML = originalBtnHTML;
+    if (State.currentPage === 'create-request') updateBtn.innerHTML = originalBtnHTML;
 
 }
 }
@@ -1753,9 +1760,12 @@ function closeDeleteModal(e) {
 async function confirmDeleteRequest() {
 
     try {
+        if (_deleteTargetId == null) {
+            throw new Error('Please select a ride request to delete.');
+        }
 
         const response = await apiFetch(
-            `https://rideshare-backend-uv0p.onrender.com/ride-request/${editingRequestId}`,
+            `https://rideshare-backend-uv0p.onrender.com/ride-request/${encodeURIComponent(_deleteTargetId)}`,
             {
                 method: "DELETE"
             }
