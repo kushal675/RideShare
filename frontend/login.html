@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MIT BLR Ride Sharing — Login</title>
+  <meta name="theme-color" content="#081426"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="RideShare"/>
+  <link rel="manifest" href="manifest.webmanifest"/>
+  <link rel="apple-touch-icon" href="rideshare-icon-192.png"/>
+  <title>MAHE BLR Ride Sharing — Login</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
@@ -124,13 +130,13 @@
           <rect x="118" y="64" width="4" height="3" rx="1" fill="#FDE68A" opacity="0.9"/>
           <!-- Tail light -->
           <rect x="82"  y="64" width="3" height="3" rx="1" fill="#F87171" opacity="0.8"/>
-          <!-- MIT text on car -->
-          <text x="94" y="70" font-family="Poppins, Arial" font-size="5.5" font-weight="700" fill="white" opacity="0.85">MIT</text>
+          <!-- MAHE text on car -->
+          <text x="94" y="70" font-family="Poppins, Arial" font-size="5.5" font-weight="700" fill="white" opacity="0.85">MAHE</text>
         </g>
       </svg>
 
       <div class="brand-block">
-        <p class="brand-eyebrow">MIT — Bengaluru</p>
+        <p class="brand-eyebrow">MAHE — Bengaluru</p>
         <h1 class="brand-title">Ride <span>Sharing</span> Portal</h1>
       </div>
     </div>
@@ -181,7 +187,7 @@
     <!-- Divider -->
     <div class="divider">
       <div class="divider-line"></div>
-      <span class="divider-text">New to MIT BLR Rides?</span>
+      <span class="divider-text">New to MAHE BLR Rides?</span>
       <div class="divider-line"></div>
     </div>
 
@@ -201,7 +207,7 @@
       </span>
       <span class="trust-badge">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-        MIT verified
+        Student email verified
       </span>
       <span class="trust-badge">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -213,5 +219,6 @@
 
     <script src="login.js"></script>
 
+  <script src="pwa.js" defer></script>
 </body>
 </html>

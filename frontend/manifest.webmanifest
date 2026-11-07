@@ -1,0 +1,23 @@
+{
+  "id": "./",
+  "name": "MAHE BLR Ride Sharing",
+  "short_name": "RideShare",
+  "description": "Find students to share your ride.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0a1830",
+  "theme_color": "#081426",
+  "icons": [
+    {
+      "src": "./rideshare-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./rideshare-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

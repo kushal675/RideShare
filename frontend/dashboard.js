@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════
-   MIT BLR RIDE SHARING — DASHBOARD.JS
+   MAHE BLR RIDE SHARING — DASHBOARD.JS
    Version: 1.0.0
 ════════════════════════════════════════════════ */
 
@@ -23,18 +23,18 @@ function escapeHTML(value) {
 const DB = {
   requests: [
     //hard coded requests for testing
-    { id: 'r1', from: 'MIT BLR', to: 'Kempegowda Airport', date: '2025-06-24', time: '17:30', status: 'open',    notes: 'Flexible on pickup point near gate.' },
-    { id: 'r2', from: 'MIT BLR', to: 'Whitefield',         date: '2025-06-25', time: '08:00', status: 'open',    notes: '' },
-    { id: 'r3', from: 'Koramangala', to: 'MIT BLR',        date: '2025-06-23', time: '19:15', status: 'matched', notes: 'Need to be there by 8 PM.' },
-    { id: 'r4', from: 'Electronic City', to: 'MIT BLR',    date: '2025-06-22', time: '09:00', status: 'closed',  notes: '' },
-    { id: 'r5', from: 'MIT BLR', to: 'Majestic',           date: '2025-06-20', time: '18:15', status: 'expired', notes: 'Connecting train at 7:30.' },
-    { id: 'r6', from: 'MIT BLR', to: 'MG Road',            date: '2025-06-19', time: '11:00', status: 'matched', notes: '' },
+    { id: 'r1', from: 'MAHE BLR', to: 'Kempegowda Airport', date: '2025-06-24', time: '17:30', status: 'open',    notes: 'Flexible on pickup point near gate.' },
+    { id: 'r2', from: 'MAHE BLR', to: 'Whitefield',         date: '2025-06-25', time: '08:00', status: 'open',    notes: '' },
+    { id: 'r3', from: 'Koramangala', to: 'MAHE BLR',        date: '2025-06-23', time: '19:15', status: 'matched', notes: 'Need to be there by 8 PM.' },
+    { id: 'r4', from: 'Electronic City', to: 'MAHE BLR',    date: '2025-06-22', time: '09:00', status: 'closed',  notes: '' },
+    { id: 'r5', from: 'MAHE BLR', to: 'Majestic',           date: '2025-06-20', time: '18:15', status: 'expired', notes: 'Connecting train at 7:30.' },
+    { id: 'r6', from: 'MAHE BLR', to: 'MG Road',            date: '2025-06-19', time: '11:00', status: 'matched', notes: '' },
   ],
 
   groups: [
     //hardcoded groups for testing
     {
-      id: 'g1', from: 'MIT BLR', to: 'Airport', date: '2025-06-24', time: '17:30',
+      id: 'g1', from: 'MAHE BLR', to: 'Airport', date: '2025-06-24', time: '17:30',
       members: [
         { initials: 'KM', color: '#2563EB' },
         { initials: 'AP', color: '#059669' },
@@ -43,7 +43,7 @@ const DB = {
       role: 'creator', status: 'active',
     },
     {
-      id: 'g2', from: 'MIT BLR', to: 'Whitefield', date: '2025-06-25', time: '08:00',
+      id: 'g2', from: 'MAHE BLR', to: 'Whitefield', date: '2025-06-25', time: '08:00',
       members: [
         { initials: 'KM', color: '#2563EB' },
         { initials: 'NR', color: '#7C3AED' },
@@ -51,7 +51,7 @@ const DB = {
       role: 'creator', status: 'active',
     },
     {
-      id: 'g3', from: 'Koramangala', to: 'MIT BLR', date: '2025-06-26', time: '19:15',
+      id: 'g3', from: 'Koramangala', to: 'MAHE BLR', date: '2025-06-26', time: '19:15',
       members: [
         { initials: 'SB', color: '#DC2626' },
         { initials: 'KM', color: '#2563EB' },
@@ -61,7 +61,7 @@ const DB = {
       role: 'member', status: 'active',
     },
     {
-      id: 'g4', from: 'MIT BLR', to: 'Electronic City', date: '2025-06-27', time: '18:00',
+      id: 'g4', from: 'MAHE BLR', to: 'Electronic City', date: '2025-06-27', time: '18:00',
       members: [
         { initials: 'RS', color: '#D97706' },
         { initials: 'KM', color: '#2563EB' },
@@ -785,6 +785,7 @@ function showToast(message, type = 'info', duration = 3000) {
    LOGOUT
 ══════════════════════════════════ */
 function handleLogout() {
+  if (State.mobileNavOpen) closeMobileNav();
   openModal('modalLogout');
 }
 
@@ -841,7 +842,7 @@ function initCreateForm() {
 
 /* Simulated Google Places autocomplete */
 const PLACES = [
-  'MIT BLR Campus',
+  'MAHE BLR Campus',
   'Kempegowda International Airport',
   'Majestic (KSR Railway Station)',
   'Whitefield',
@@ -1801,7 +1802,7 @@ function searchRequests(q) { /* old search removed — no-op */ }
 const MOCK_GROUPS = [
   {
     id: 'ag1',
-    from: 'MIT BLR', to: 'Kempegowda Airport',
+    from: 'MAHE BLR', to: 'Kempegowda Airport',
     date: '2025-06-24', time: '17:30',
     max_members: 4,
     waLink: '',
@@ -1812,7 +1813,7 @@ const MOCK_GROUPS = [
   },
   {
     id: 'ag2',
-    from: 'MIT BLR', to: 'Whitefield',
+    from: 'MAHE BLR', to: 'Whitefield',
     date: '2025-06-25', time: '08:00',
     max_members: 3,
     waLink: 'https://chat.whatsapp.com/example123',
@@ -2920,7 +2921,7 @@ function renderMatchingStudents() {
             <p>No matching students yet</p>
 
             <span>
-                Students who post the same route within ±30 mins will appear here
+                Students who post the same route within ±15 mins will appear here
             </span>
 
         </div>
@@ -3001,7 +3002,7 @@ function renderMatchingStudents() {
 
                 &nbsp;·&nbsp;
 
-                ±30 min match
+                ±15 min match
 
             </div>
 
