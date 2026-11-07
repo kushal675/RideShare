@@ -5409,7 +5409,7 @@ app.delete("/ride-request/:requestId", requireAuth, async (req, res) => {
         // Check whether this ride request owns a group
         //--------------------------------------------------
 
-        const { data: group, error: groupError } =
+        const { data: ownedGroup, error: groupError } =
             await supabase
                 .from("groups")
                 .select("*")
@@ -5427,6 +5427,47 @@ app.delete("/ride-request/:requestId", requireAuth, async (req, res) => {
 
         }
 
+        // A request can belong to another person's group, not just own one.
+        const { data: membership, error: membershipError } = await supabase
+            .from("group_members")
+            .select("group_id")
+            .eq("ride_request_id", requestId)
+            .maybeSingle();
+        if (membershipError) throw membershipError;
+
+        let group = ownedGroup;
+        if (membership && (!group || group.id !== membership.group_id)) {
+            const { data: memberGroup, error: memberGroupError } = await supabase
+                .from("groups").select("*").eq("id", membership.group_id).single();
+            if (memberGroupError) throw memberGroupError;
+            group = memberGroup;
+        }
+
+        // Remove every invitation/join request referencing this ride before deletion.
+        // A request may have references in groups other than its current group.
+        async function deleteRide() {
+            const { data: related, error: lookupError } = await supabase
+                .from("group_request").select("*")
+                .or(`sender_request_id.eq.${requestId},receiver_request_id.eq.${requestId}`);
+            if (lookupError) return { error: lookupError };
+            for (const item of related || []) {
+                if (item.status !== "pending") continue;
+                if (item.type === "invitation") {
+                    await removePendingNotification({ userId: item.receiver_id,
+                        type: "INVITATION_RECEIVED", groupId: item.group_id,
+                        rideRequestId: item.receiver_request_id });
+                } else if (item.type === "join_request") {
+                    await removePendingNotification({ userId: item.receiver_id,
+                        type: "JOIN_REQUEST", groupId: item.group_id,
+                        rideRequestId: item.sender_request_id });
+                }
+            }
+            const { error } = await supabase.from("group_request").delete()
+                .or(`sender_request_id.eq.${requestId},receiver_request_id.eq.${requestId}`);
+            if (error) return { error };
+            return await supabase.from("ride_requests").delete().eq("id", requestId);
+        }
+
         ////////////////////////////////////////////////////
         // CASE 1
         // Looking for Group
@@ -5435,10 +5476,7 @@ app.delete("/ride-request/:requestId", requireAuth, async (req, res) => {
         if (!group) {
 
             const { error: deleteRideError } =
-                await supabase
-                    .from("ride_requests")
-                    .delete()
-                    .eq("id", requestId);
+                await deleteRide();
 
             if (deleteRideError) {
 
@@ -5543,10 +5581,7 @@ app.delete("/ride-request/:requestId", requireAuth, async (req, res) => {
             //------------------------------------------
 
             const { error: rideDeleteError } =
-                await supabase
-                    .from("ride_requests")
-                    .delete()
-                    .eq("id", requestId);
+                await deleteRide();
 
             if (rideDeleteError) {
 
@@ -5623,10 +5658,7 @@ app.delete("/ride-request/:requestId", requireAuth, async (req, res) => {
             //------------------------------------------
 
             const { error: deleteRideError } =
-                await supabase
-                    .from("ride_requests")
-                    .delete()
-                    .eq("id", requestId);
+                await deleteRide();
 
             if (deleteRideError) {
 
@@ -5682,7 +5714,7 @@ app.delete("/ride-request/:requestId", requireAuth, async (req, res) => {
 
             }
 
-            await createNotification({
+            if (remainingMembers.length === 1) await createNotification({
 
                 userId: remainingMembers[0].user_id,
 
@@ -5904,10 +5936,8 @@ app.delete("/ride-request/:requestId", requireAuth, async (req, res) => {
             // Delete creator ride request
             //------------------------------------------
 
-            await supabase
-                .from("ride_requests")
-                .delete()
-                .eq("id", requestId);
+            const { error: finalDeleteError } = await deleteRide();
+            if (finalDeleteError) return res.status(500).json({ success: false, message: "Unable to delete ride request." });
 
             return res.json({
 
@@ -6029,10 +6059,7 @@ app.delete("/ride-request/:requestId", requireAuth, async (req, res) => {
         //--------------------------------------------------
 
         const { error: deleteRideRequestError } =
-            await supabase
-                .from("ride_requests")
-                .delete()
-                .eq("id", requestId);
+            await deleteRide();
 
         if (deleteRideRequestError) {
 
