@@ -23,10 +23,10 @@ app.set("trust proxy", 1);
 
 const allowedOrigins = [
     "https://maherideshare.in",
-    "https://www.maherideshare.in"
+    "https://www.maherideshare.in",
+    "https://your-netlify-site.netlify.app",
     "http://localhost:5500",
-    "http://127.0.0.1:5500",
-    "https://maherideshare.netlify.app"
+    "http://127.0.0.1:5500"
 ];
 app.use(cors({
     origin(origin, callback) {
@@ -40,7 +40,7 @@ app.use(cors({
             return callback(null, true);
         }
 
-        return callback(new Error("Not allowed by CORS"));
+        return callback(null, false);
     },
 
     methods: ["GET", "POST", "PUT", "DELETE"],
@@ -75,13 +75,18 @@ const authLimiter = rateLimit({
 });
 
 const otpLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 5,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // Allow up to 10 OTP requests per email in 15 mins
+    keyGenerator: (req) => {
+        // Rate-limit per email address instead of raw IP address
+        const email = req.body && req.body.email ? req.body.email.trim().toLowerCase() : req.ip;
+        return `otp_${email}`;
+    },
     standardHeaders: true,
     legacyHeaders: false,
     message: {
         success: false,
-        message: "Too many OTP requests. Please try again after 15 minutes."
+        message: "Too many OTP requests for this email. Please try again after 15 minutes."
     }
 });
 
@@ -1171,11 +1176,11 @@ app.post("/matching-students", requireAuth, async (req, res) => {
 
         const requestTime = new Date(`1970-01-01T${ride_time}`);
 
-        const lowerTime = new Date(requestTime.getTime() - 15 * 60 * 1000)
+        const lowerTime = new Date(requestTime.getTime() - 30 * 60 * 1000)
             .toTimeString()
             .slice(0, 8);
 
-        const upperTime = new Date(requestTime.getTime() + 15 * 60 * 1000)
+        const upperTime = new Date(requestTime.getTime() + 30 * 60 * 1000)
             .toTimeString()
             .slice(0, 8);
 
@@ -1975,11 +1980,11 @@ app.post("/matching-groups", requireAuth, async (req, res) => {
 
         const requestTime = new Date(`1970-01-01T${ride_time}`);
 
-        const lowerTime = new Date(requestTime.getTime() - 15 * 60 * 1000)
+        const lowerTime = new Date(requestTime.getTime() - 30 * 60 * 1000)
             .toTimeString()
             .slice(0, 8);
 
-        const upperTime = new Date(requestTime.getTime() + 15 * 60 * 1000)
+        const upperTime = new Date(requestTime.getTime() + 30 * 60 * 1000)
             .toTimeString()
             .slice(0, 8);
 
