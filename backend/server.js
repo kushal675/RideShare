@@ -2165,14 +2165,41 @@ app.post("/matching-groups", requireAuth, async (req, res) => {
 ///////////////////////////////////////////////////
 // Accept Join Request
 ///////////////////////////////////////////////////
+// Both acceptance paths use one database transaction.
+async function acceptGroupRequest(requestId, actorId, res) {
+    try {
+        if (!process.env.SUPABASE_SECRET_KEY) {
+            console.error("SUPABASE_SECRET_KEY is missing");
+            return res.status(500).json({ success: false, message: "Group acceptance is not configured." });
+        }
+        const acceptanceClient = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SECRET_KEY);
+        const { data, error } = await acceptanceClient.rpc("accept_group_request_atomic", {
+            p_request_id: requestId,
+            p_actor_id: actorId
+        });
+        if (error) {
+            const known = ["Request not found", "Request is no longer pending", "Group is no longer active", "Not authorized", "Invalid ride request", "Ride request is no longer available", "Ride request already belongs to a group", "Group creator already belongs to another group", "Group is full"];
+            const message = known.find(item => error.message && error.message.includes(item));
+            if (message) return res.status(message === "Not authorized" ? 403 : 409).json({ success: false, message });
+            console.error("Group acceptance failed:", error);
+            return res.status(500).json({ success: false, message: "Unable to accept the request. Please try again." });
+        }
+        return res.json(data);
+    } catch (error) {
+        console.error("Group acceptance failed:", error);
+        return res.status(500).json({ success: false, message: "Unable to accept the request. Please try again." });
+    }
+}
+
 app.post("/accept-join-request", requireAuth, async (req, res) => {
     const { requestId } = req.body;
-    if (!requestId) return res.status(400).json({ success: false, message: "Join request is required." });
-    const { data, error } = await supabase.rpc("accept_group_request_atomic", { p_request_id: requestId, p_actor_id: req.user.uid });
-    if (error) { console.error("Accept join request:", error); return res.status(400).json({ success: false, message: error.message || "Unable to accept request." }); }
-    return res.json(data);
+    if (!requestId || typeof requestId !== "string") return res.status(400).json({ success: false, message: "Request ID is required." });
+    return acceptGroupRequest(requestId, req.user.uid, res);
 });
 
+///////////////////////////////////////////////////
+// Reject Join Request
+///////////////////////////////////////////////////
 app.post("/reject-join-request", requireAuth, async (req, res) => {
 
     const { requestId } = req.body;
@@ -2433,14 +2460,26 @@ app.get("/incoming-invitations", requireAuth, async (req, res) => {
 
 app.post("/accept-invitation", requireAuth, async (req, res) => {
     const { groupId } = req.body;
-    if (!groupId) return res.status(400).json({ success: false, message: "Group is required." });
-    const { data: invitation, error: lookupError } = await supabase.from("group_request").select("id")
-        .eq("group_id", groupId).eq("receiver_id", req.user.uid).eq("status", "pending").eq("type", "invitation").maybeSingle();
-    if (lookupError || !invitation) return res.status(400).json({ success: false, message: "Invitation not found." });
-    const { data, error } = await supabase.rpc("accept_group_request_atomic", { p_request_id: invitation.id, p_actor_id: req.user.uid });
-    if (error) { console.error("Accept invitation:", error); return res.status(400).json({ success: false, message: error.message || "Unable to accept invitation." }); }
-    return res.json(data);
+    if (!groupId || typeof groupId !== "string") return res.status(400).json({ success: false, message: "Group ID is required." });
+    try {
+        const { data, error } = await supabase.from("group_request").select("id")
+            .eq("group_id", groupId).eq("receiver_id", req.user.uid)
+            .eq("status", "pending").eq("type", "invitation").maybeSingle();
+        if (error) {
+            console.error("Invitation lookup failed:", error);
+            return res.status(500).json({ success: false, message: "Unable to find invitation." });
+        }
+        if (!data) return res.status(409).json({ success: false, message: "Invitation is no longer pending." });
+        return acceptGroupRequest(data.id, req.user.uid, res);
+    } catch (error) {
+        console.error("Invitation lookup failed:", error);
+        return res.status(500).json({ success: false, message: "Unable to find invitation." });
+    }
 });
+
+////////////////////////////////////////////////////
+/////// REJECT INVITATION
+////////////////////////////////////////////////////
 
 app.post("/reject-invitation",requireAuth, async (req, res) => {
 
@@ -4574,7 +4613,7 @@ app.delete("/ride-request/:requestId", requireAuth, async (req, res) => {
         // Check whether this ride request owns a group
         //--------------------------------------------------
 
-        const { data: ownedGroup, error: groupError } =
+        const { data: group, error: groupError } =
             await supabase
                 .from("groups")
                 .select("*")
@@ -4592,47 +4631,6 @@ app.delete("/ride-request/:requestId", requireAuth, async (req, res) => {
 
         }
 
-        // A request can belong to another person's group, not just own one.
-        const { data: membership, error: membershipError } = await supabase
-            .from("group_members")
-            .select("group_id")
-            .eq("ride_request_id", requestId)
-            .maybeSingle();
-        if (membershipError) throw membershipError;
-
-        let group = ownedGroup;
-        if (membership && (!group || group.id !== membership.group_id)) {
-            const { data: memberGroup, error: memberGroupError } = await supabase
-                .from("groups").select("*").eq("id", membership.group_id).single();
-            if (memberGroupError) throw memberGroupError;
-            group = memberGroup;
-        }
-
-        // Remove every invitation/join request referencing this ride before deletion.
-        // A request may have references in groups other than its current group.
-        async function deleteRide() {
-            const { data: related, error: lookupError } = await supabase
-                .from("group_request").select("*")
-                .or(`sender_request_id.eq.${requestId},receiver_request_id.eq.${requestId}`);
-            if (lookupError) return { error: lookupError };
-            for (const item of related || []) {
-                if (item.status !== "pending") continue;
-                if (item.type === "invitation") {
-                    await removePendingNotification({ userId: item.receiver_id,
-                        type: "INVITATION_RECEIVED", groupId: item.group_id,
-                        rideRequestId: item.receiver_request_id });
-                } else if (item.type === "join_request") {
-                    await removePendingNotification({ userId: item.receiver_id,
-                        type: "JOIN_REQUEST", groupId: item.group_id,
-                        rideRequestId: item.sender_request_id });
-                }
-            }
-            const { error } = await supabase.from("group_request").delete()
-                .or(`sender_request_id.eq.${requestId},receiver_request_id.eq.${requestId}`);
-            if (error) return { error };
-            return await supabase.from("ride_requests").delete().eq("id", requestId);
-        }
-
         ////////////////////////////////////////////////////
         // CASE 1
         // Looking for Group
@@ -4641,7 +4639,10 @@ app.delete("/ride-request/:requestId", requireAuth, async (req, res) => {
         if (!group) {
 
             const { error: deleteRideError } =
-                await deleteRide();
+                await supabase
+                    .from("ride_requests")
+                    .delete()
+                    .eq("id", requestId);
 
             if (deleteRideError) {
 
@@ -4746,7 +4747,10 @@ app.delete("/ride-request/:requestId", requireAuth, async (req, res) => {
             //------------------------------------------
 
             const { error: rideDeleteError } =
-                await deleteRide();
+                await supabase
+                    .from("ride_requests")
+                    .delete()
+                    .eq("id", requestId);
 
             if (rideDeleteError) {
 
@@ -4823,7 +4827,10 @@ app.delete("/ride-request/:requestId", requireAuth, async (req, res) => {
             //------------------------------------------
 
             const { error: deleteRideError } =
-                await deleteRide();
+                await supabase
+                    .from("ride_requests")
+                    .delete()
+                    .eq("id", requestId);
 
             if (deleteRideError) {
 
@@ -4879,7 +4886,7 @@ app.delete("/ride-request/:requestId", requireAuth, async (req, res) => {
 
             }
 
-            if (remainingMembers.length === 1) await createNotification({
+            await createNotification({
 
                 userId: remainingMembers[0].user_id,
 
@@ -5101,8 +5108,10 @@ app.delete("/ride-request/:requestId", requireAuth, async (req, res) => {
             // Delete creator ride request
             //------------------------------------------
 
-            const { error: finalDeleteError } = await deleteRide();
-            if (finalDeleteError) return res.status(500).json({ success: false, message: "Unable to delete ride request." });
+            await supabase
+                .from("ride_requests")
+                .delete()
+                .eq("id", requestId);
 
             return res.json({
 
@@ -5224,7 +5233,10 @@ app.delete("/ride-request/:requestId", requireAuth, async (req, res) => {
         //--------------------------------------------------
 
         const { error: deleteRideRequestError } =
-            await deleteRide();
+            await supabase
+                .from("ride_requests")
+                .delete()
+                .eq("id", requestId);
 
         if (deleteRideRequestError) {
 
