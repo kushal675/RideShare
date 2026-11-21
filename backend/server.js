@@ -1556,6 +1556,26 @@ if (existingGroup) {
 
 } else {
 
+    // Use the creator's phone as the initial WhatsApp contact.
+    const { data: creator, error: creatorError } = await supabase
+        .from("users")
+        .select("phone")
+        .eq("uid", creatorId)
+        .maybeSingle();
+
+    if (creatorError) {
+        console.error("Creator phone lookup failed:", creatorError);
+        return res.status(500).json({ success: false, message: "Server error." });
+    }
+
+    const phone = String(creator?.phone || "").trim();
+    let digits = phone.replace(/\D/g, "");
+    // Local 10-digit numbers are treated as Indian numbers.
+    if (digits.length === 10 && !phone.startsWith("+")) digits = `91${digits}`;
+    const whatsappLink = digits.length >= 11 && digits.length <= 15
+        ? `https://wa.me/${digits}`
+        : null;
+
     const { data: newGroup, error: groupError } =
         await supabase
             .from("groups")
@@ -1563,6 +1583,7 @@ if (existingGroup) {
                 creator_id: creatorId,
                 ride_request_id: requestId,
                 max_members: parsedMaxMembers,
+                whatsapp_link: whatsappLink,
                 status: "pending"
             })
             .select()
